@@ -9,8 +9,8 @@ class B:
 class C(A):
     pass
 
-print(A == None)
-print(None == A)
+print(A is None)
+print(A is None)
 
 print(A == A)
 print(A() == A)

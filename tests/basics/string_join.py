@@ -9,7 +9,7 @@ print(','.join(['a', 'b']))
 print(''.join(''))
 print(''.join('abc'))
 print(','.join('abc'))
-print(','.join('abc' for i in range(5)))
+print(','.join('abc' for _ in range(5)))
 
 print(b','.join([b'abc', b'123']))
 

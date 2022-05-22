@@ -116,14 +116,12 @@ def fixup_c(filename):
             # Get next line.
             l = lines.pop(0)
 
-            # Dedent #'s to match indent of following line (not previous line).
-            m = re.match(r"( +)#(if |ifdef |ifndef |elif |else|endif)", l)
-            if m:
-                indent = len(m.group(1))
-                directive = m.group(2)
+            if m := re.match(r"( +)#(if |ifdef |ifndef |elif |else|endif)", l):
+                indent = len(m[1])
+                directive = m[2]
                 if directive in ("if ", "ifdef ", "ifndef "):
                     l_next = lines[0]
-                    indent_next = len(re.match(r"( *)", l_next).group(1))
+                    indent_next = len(re.match(r"( *)", l_next)[1])
                     if indent - 4 == indent_next and re.match(r" +(} else |case )", l_next):
                         # This #-line (and all associated ones) needs dedenting by 4 spaces.
                         l = l[4:]

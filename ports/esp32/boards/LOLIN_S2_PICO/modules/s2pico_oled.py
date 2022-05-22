@@ -42,7 +42,7 @@ class OLED(SSD1306_I2C):
         _wifi = sta_if.scan()
 
         self.fill(0)
-        self.text(str(len(_wifi)) + " Networks", 0, 0, 1)
-        self.text(str(_wifi[0][3]) + " " + (_wifi[0][0]).decode("utf-8"), 0, 12, 1)
-        self.text(str(_wifi[1][3]) + " " + (_wifi[1][0]).decode("utf-8"), 0, 24, 1)
+        self.text(f"{len(_wifi)} Networks", 0, 0, 1)
+        self.text(f"{str(_wifi[0][3])} " + (_wifi[0][0]).decode("utf-8"), 0, 12, 1)
+        self.text(f"{str(_wifi[1][3])} " + (_wifi[1][0]).decode("utf-8"), 0, 24, 1)
         self.show()

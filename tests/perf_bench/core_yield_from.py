@@ -3,17 +3,14 @@
 
 def recursive_yield_from(depth, iter_):
     if depth <= 0:
-        for i in iter_:
-            yield i
+        yield from iter_
     else:
         yield from recursive_yield_from(depth - 1, iter_)
 
 
 def test(n):
     global result
-    result = 0
-    for i in recursive_yield_from(10, range(n)):
-        result += i
+    result = sum(recursive_yield_from(10, range(n)))
 
 
 ###########################################################################

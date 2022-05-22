@@ -20,7 +20,7 @@ def memset(dest: ptr8, val: int, n: int):
 @micropython.viper
 def memset2(dest_in, val: int):
     dest = ptr8(dest_in)
-    n = int(len(dest_in))
+    n = len(dest_in)
     for i in range(n):
         dest[i] = val
 

@@ -31,11 +31,10 @@ def irq(event, data):
     elif event == _IRQ_PERIPHERAL_DISCONNECT:
         print("_IRQ_PERIPHERAL_DISCONNECT")
     elif event == _IRQ_GATTC_CHARACTERISTIC_RESULT:
-        if data[-1] == GAP_DEVICE_NAME_UUID:
-            print("_IRQ_GATTC_CHARACTERISTIC_RESULT", data[-1])
-            waiting_events[event] = data[2]
-        else:
+        if data[-1] != GAP_DEVICE_NAME_UUID:
             return
+        print("_IRQ_GATTC_CHARACTERISTIC_RESULT", data[-1])
+        waiting_events[event] = data[2]
     elif event == _IRQ_GATTC_CHARACTERISTIC_DONE:
         print("_IRQ_GATTC_CHARACTERISTIC_DONE")
     elif event == _IRQ_GATTC_READ_RESULT:
@@ -51,7 +50,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.
@@ -71,7 +70,7 @@ def instance0():
         # Do multiple iterations to test changing the name.
         for iteration in range(2):
             # Set the GAP device name and start advertising.
-            ble.config(gap_name="GAP_NAME{}".format(iteration))
+            ble.config(gap_name=f"GAP_NAME{iteration}")
             print(ble.config("gap_name"))
             ble.gap_advertise(20_000)
 

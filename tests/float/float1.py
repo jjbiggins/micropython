@@ -9,7 +9,7 @@ print(0e0)
 print(0e-0)
 
 # float construction
-print(float(1.2))
+print(1.2)
 print(float("1.2"))
 print(float("+1"))
 print(float("1e1"))
@@ -50,9 +50,7 @@ print(-(1.2))
 x = 1 / 2
 print(x)
 
-# /= operator
-a = 1
-a /= 2
+a = 1 / 2
 print(a)
 
 # floor division

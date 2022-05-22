@@ -67,7 +67,7 @@ def get_version_info_from_docs_conf():
         for line in f:
             if line.startswith("version = release = '"):
                 ver = line.strip().split(" = ")[2].strip("'")
-                git_tag = "v" + ver
+                git_tag = f"v{ver}"
                 return git_tag, "<no hash>"
     return None
 
@@ -108,7 +108,7 @@ def make_version_header(filename):
 
     # Only write the file if we need to
     if write_file:
-        print("GEN %s" % filename)
+        print(f"GEN {filename}")
         with open(filename, "w") as f:
             f.write(file_data)
 

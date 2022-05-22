@@ -40,9 +40,8 @@ def instance1():
                 adv_types[data[2]] = True
                 if adv_data is None:
                     adv_data = bytes(data[4])
-                else:
-                    if adv_data != data[4]:
-                        adv_data = b"MISMATCH"
+                elif adv_data != data[4]:
+                    adv_data = b"MISMATCH"
         elif ev == _IRQ_SCAN_DONE:
             finished = True
 

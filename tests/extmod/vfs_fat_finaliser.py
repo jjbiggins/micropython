@@ -66,7 +66,7 @@ names = ["x%d" % i for i in range(4)]
 # ensuring that the files are allocated from never-before-used blocks and
 # therefore couldn't possibly have any references to them left behind on
 # the stack.
-for i in range(1024):
+for _ in range(1024):
     []
 
 # Run the test: create files without closing them, run GC, then read back files.

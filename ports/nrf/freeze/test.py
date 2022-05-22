@@ -2,4 +2,4 @@ import sys
 
 
 def hello():
-    print("Hello %s!" % sys.platform)
+    print(f"Hello {sys.platform}!")

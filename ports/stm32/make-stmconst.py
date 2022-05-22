@@ -32,8 +32,7 @@ elif platform.python_version_tuple()[0] == "3":
 # given a list of (name,regex) pairs, find the first one that matches the given line
 def re_match_first(regexs, line):
     for name, regex in regexs:
-        match = re.match(regex, line)
-        if match:
+        if match := re.match(regex, line):
             return name, match
     return None, None
 
@@ -153,8 +152,11 @@ def parse_file(filename):
                 if m[0] == "IO reg":
                     regs.append((reg, offset, bits, comment))
                 else:
-                    for i in range(int(d["array"])):
-                        regs.append((reg + str(i), offset + i * bits // 8, bits, comment))
+                    regs.extend(
+                        (reg + str(i), offset + i * bits // 8, bits, comment)
+                        for i in range(int(d["array"]))
+                    )
+
                 m = lexer.next_match()
             if m[0] == "}":
                 pass
@@ -189,7 +191,7 @@ def print_periph(periph_name, periph_val, needed_qstrs, needed_mpzs):
 def print_regs(reg_name, reg_defs, needed_qstrs, needed_mpzs):
     reg_name = reg_name.upper()
     for r in reg_defs:
-        qstr = reg_name + "_" + r[0]
+        qstr = f"{reg_name}_{r[0]}"
         print("{ MP_ROM_QSTR(MP_QSTR_%s), " % qstr, end="")
         print_int_obj(r[1], needed_mpzs)
         print(" }, // %s-bits, %s" % (r[2], r[3]))
@@ -204,7 +206,7 @@ def print_regs(reg_name, reg_defs, needed_qstrs, needed_mpzs):
 # And for the number of constants we have, this function seems to use about the same amount
 # of ROM as print_regs.
 def print_regs_as_submodules(reg_name, reg_defs, modules, needed_qstrs):
-    mod_name_lower = reg_name.lower() + "_"
+    mod_name_lower = f"{reg_name.lower()}_"
     mod_name_upper = mod_name_lower.upper()
     modules.append((mod_name_lower, mod_name_upper))
 
@@ -268,7 +270,7 @@ def main():
     needed_qstrs = set()
     needed_mpzs = set()
 
-    print("// Automatically generated from %s by make-stmconst.py" % args.file[0])
+    print(f"// Automatically generated from {args.file[0]} by make-stmconst.py")
     print("")
 
     for periph_name, periph_val in periphs:
@@ -317,7 +319,7 @@ def main():
     with open(args.qstr_filename, "wt") as qstr_file:
         print("#if MICROPY_PY_STM", file=qstr_file)
         for qstr in sorted(needed_qstrs):
-            print("Q({})".format(qstr), file=qstr_file)
+            print(f"Q({qstr})", file=qstr_file)
         print("#endif // MICROPY_PY_STM", file=qstr_file)
 
     with open(args.mpz_filename, "wt") as mpz_file:

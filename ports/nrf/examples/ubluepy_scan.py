@@ -2,20 +2,19 @@ from ubluepy import Scanner, constants
 
 
 def bytes_to_str(bytes):
-    string = ""
-    for b in bytes:
-        string += chr(b)
-    return string
+    return "".join(chr(b) for b in bytes)
 
 
 def get_device_names(scan_entries):
     dev_names = []
     for e in scan_entries:
-        scan = e.getScanData()
-        if scan:
-            for s in scan:
-                if s[0] == constants.ad_types.AD_TYPE_COMPLETE_LOCAL_NAME:
-                    dev_names.append((e, bytes_to_str(s[2])))
+        if scan := e.getScanData():
+            dev_names.extend(
+                (e, bytes_to_str(s[2]))
+                for s in scan
+                if s[0] == constants.ad_types.AD_TYPE_COMPLETE_LOCAL_NAME
+            )
+
     return dev_names
 
 

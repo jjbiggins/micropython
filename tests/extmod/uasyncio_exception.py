@@ -13,7 +13,6 @@ except ImportError:
 async def main():
     print("main start")
     raise ValueError(1)
-    print("main done")
 
 
 try:
@@ -25,7 +24,6 @@ except ValueError as er:
 async def task():
     print("task start")
     raise ValueError(2)
-    print("task done")
 
 
 async def main():
@@ -51,7 +49,6 @@ async def main():
     print("main start")
     asyncio.create_task(task())
     raise ValueError(3)
-    print("main done")
 
 
 try:

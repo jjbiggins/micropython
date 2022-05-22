@@ -135,22 +135,23 @@ class BLESimpleCentral:
 
         elif event == _IRQ_GATTC_CHARACTERISTIC_DONE:
             # Characteristic query complete.
-            if self._tx_handle is not None and self._rx_handle is not None:
-                # We've finished connecting and discovering device, fire the connect callback.
-                if self._conn_callback:
-                    self._conn_callback()
-            else:
+            if self._tx_handle is None or self._rx_handle is None:
                 print("Failed to find uart rx characteristic.")
 
+            elif self._conn_callback:
+                self._conn_callback()
         elif event == _IRQ_GATTC_WRITE_DONE:
             conn_handle, value_handle, status = data
             print("TX complete")
 
         elif event == _IRQ_GATTC_NOTIFY:
             conn_handle, value_handle, notify_data = data
-            if conn_handle == self._conn_handle and value_handle == self._tx_handle:
-                if self._notify_callback:
-                    self._notify_callback(notify_data)
+            if (
+                conn_handle == self._conn_handle
+                and value_handle == self._tx_handle
+                and self._notify_callback
+            ):
+                self._notify_callback(notify_data)
 
     # Returns true if we've successfully connected and discovered characteristics.
     def is_connected(self):

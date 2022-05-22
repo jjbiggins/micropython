@@ -2,8 +2,7 @@ import bench
 
 
 def test(num):
-    for i in iter(range(num)):
-        pass
+    pass
 
 
 bench.run(test)

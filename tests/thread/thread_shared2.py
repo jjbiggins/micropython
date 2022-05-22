@@ -11,7 +11,7 @@ def foo(lst, i):
 
 
 def thread_entry(n, lst, idx):
-    for i in range(n):
+    for _ in range(n):
         foo(lst, idx)
     with lock:
         global n_finished

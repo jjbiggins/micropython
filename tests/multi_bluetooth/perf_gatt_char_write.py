@@ -39,7 +39,10 @@ def irq(event, data):
         global packet_sequence
         conn_handle, attr_handle = data
         data = ble.gatts_read(attr_handle)
-        if not (data[0] == packet_sequence and data[-1] == (256 - packet_sequence) & 0xFF):
+        if (
+            data[0] != packet_sequence
+            or data[-1] != (256 - packet_sequence) & 0xFF
+        ):
             print("_IRQ_GATTS_WRITE data invalid:", packet_sequence, data)
         elif packet_sequence % 10 == 0:
             print("_IRQ_GATTS_WRITE", packet_sequence)
@@ -65,7 +68,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.
@@ -108,7 +111,7 @@ def instance1():
         data = bytearray(ord("A") + (i % 64) for i in range(_CHAR_SIZE))
         for mode in (0, 1):
             ticks_start = time.ticks_ms()
-            for i in range(_NUM_NOTIFICATIONS):
+            for _ in range(_NUM_NOTIFICATIONS):
                 data[0] = packet_sequence
                 data[-1] = 256 - packet_sequence
                 if packet_sequence % 10 == 0:
@@ -129,13 +132,9 @@ def instance1():
             ticks_total = time.ticks_diff(ticks_end, ticks_start)
 
             print(
-                "Did {} writes in {} ms. {} ms/write, {} bytes/sec".format(
-                    _NUM_NOTIFICATIONS,
-                    ticks_total,
-                    ticks_total / _NUM_NOTIFICATIONS,
-                    _NUM_NOTIFICATIONS * len(data) * 1000 // ticks_total,
-                )
+                f"Did {_NUM_NOTIFICATIONS} writes in {ticks_total} ms. {ticks_total / _NUM_NOTIFICATIONS} ms/write, {_NUM_NOTIFICATIONS * len(data) * 1000 // ticks_total} bytes/sec"
             )
+
 
             time.sleep_ms(100)
 

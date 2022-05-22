@@ -1,13 +1,13 @@
 # test basic properties of exceptions
 
 print(repr(IndexError()))
-print(str(IndexError()))
+print(IndexError())
 
-print(str(IndexError("foo")))
+print(IndexError("foo"))
 
 a = IndexError(1, "test", [100, 200])
 print(repr(a))
-print(str(a))
+print(a)
 print(a.args)
 
 s = StopIteration()

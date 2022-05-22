@@ -5,4 +5,5 @@ cause: MicroPython is optimised for code space.
 workaround: Unknown
 """
 
-rf"hello"
+
+"hello"

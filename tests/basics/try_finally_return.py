@@ -16,7 +16,7 @@ def func2():
 def func3():
     try:
         s = func2()
-        return s + ", did this work?"
+        return f"{s}, did this work?"
     finally:
         print("finally 3")
 

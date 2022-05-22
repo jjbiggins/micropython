@@ -127,7 +127,7 @@ class PyInstance:
 class PyInstanceSubProcess(PyInstance):
     def __init__(self, argv, env=None):
         self.argv = argv
-        self.env = {n: v for n, v in (i.split("=") for i in env)} if env else None
+        self.env = dict((i.split("=") for i in env)) if env else None
         self.popen = None
         self.finished = True
 
@@ -170,11 +170,10 @@ class PyInstanceSubProcess(PyInstance):
             self.finished = self.popen.poll() is not None
             return None, None
         out = self.popen.stdout.raw.readline()
-        if out == b"":
-            self.finished = self.popen.poll() is not None
-            return None, None
-        else:
+        if out != b"":
             return str(out.rstrip(), "ascii"), None
+        self.finished = self.popen.poll() is not None
+        return None, None
 
     def write(self, data):
         self.popen.stdin.write(data)
@@ -193,9 +192,9 @@ class PyInstancePyboard(PyInstance):
     @staticmethod
     def map_device_shortcut(device):
         if device[0] == "a" and device[1:].isdigit():
-            return "/dev/ttyACM" + device[1:]
+            return f"/dev/ttyACM{device[1:]}"
         elif device[0] == "u" and device[1:].isdigit():
-            return "/dev/ttyUSB" + device[1:]
+            return f"/dev/ttyUSB{device[1:]}"
         else:
             return device
 
@@ -265,9 +264,8 @@ def prepare_test_file_list(test_files):
         num_instances = 0
         with open(test_file) as f:
             for line in f:
-                m = re.match(r"def instance([0-9]+)\(\):", line)
-                if m:
-                    num_instances = max(num_instances, int(m.group(1)) + 1)
+                if m := re.match(r"def instance([0-9]+)\(\):", line):
+                    num_instances = max(num_instances, int(m[1]) + 1)
         test_files2.append((test_file, num_instances))
     return test_files2
 
@@ -296,7 +294,7 @@ def run_test_on_instances(test_file, num_instances, instances):
             injected_globals += "HOST_IP = '" + get_host_ip() + "'\n"
 
     if cmd_args.trace_output:
-        print("TRACE {}:".format("|".join(str(i) for i in instances)))
+        print(f'TRACE {"|".join((str(i) for i in instances))}:')
 
     # Start all instances running, in order, waiting until they signal they are ready
     for idx in range(num_instances):
@@ -304,9 +302,7 @@ def run_test_on_instances(test_file, num_instances, instances):
         instance = instances[idx]
         instance.start_file(test_file, append=append_code)
         last_read_time = time.time()
-        while True:
-            if instance.is_finished():
-                break
+        while not instance.is_finished():
             out, err = instance.readline()
             if out is None and err is None:
                 if time.time() > last_read_time + INSTANCE_READ_TIMEOUT_S:
@@ -316,7 +312,9 @@ def run_test_on_instances(test_file, num_instances, instances):
                 time.sleep(0.1)
                 continue
             last_read_time = time.time()
-            if out is not None and not any(m in out for m in IGNORE_OUTPUT_MATCHES):
+            if out is not None and all(
+                m not in out for m in IGNORE_OUTPUT_MATCHES
+            ):
                 trace_instance_output(idx, out)
                 if out.startswith("SET "):
                     injected_globals += out[4:] + "\n"
@@ -354,7 +352,9 @@ def run_test_on_instances(test_file, num_instances, instances):
                     continue
                 num_output += 1
                 last_read_time[idx] = time.time()
-                if out is not None and not any(m in out for m in IGNORE_OUTPUT_MATCHES):
+                if out is not None and all(
+                    m not in out for m in IGNORE_OUTPUT_MATCHES
+                ):
                     trace_instance_output(idx, out)
                     if out.startswith("BROADCAST "):
                         for instance2 in instances:
@@ -403,7 +403,7 @@ def run_tests(test_files, instances_truth, instances_test):
 
     for test_file, num_instances in test_files:
         instances_str = "|".join(str(instances_test[i]) for i in range(num_instances))
-        print("{} on {}: ".format(test_file, instances_str), end="")
+        print(f"{test_file} on {instances_str}: ", end="")
         if cmd_args.show_output or cmd_args.trace_output:
             print()
         sys.stdout.flush()
@@ -413,7 +413,7 @@ def run_tests(test_files, instances_truth, instances_test):
 
         if not skip:
             # Check if truth exists in a file, and read it in
-            test_file_expected = test_file + ".exp"
+            test_file_expected = f"{test_file}.exp"
             if os.path.isfile(test_file_expected):
                 with open(test_file_expected) as f:
                     output_truth = f.read()
@@ -451,13 +451,16 @@ def run_tests(test_files, instances_truth, instances_test):
         if cmd_args.show_output:
             print()
 
-    print("{} tests performed".format(len(skipped_tests) + len(passed_tests) + len(failed_tests)))
-    print("{} tests passed".format(len(passed_tests)))
+    print(
+        f"{len(skipped_tests) + len(passed_tests) + len(failed_tests)} tests performed"
+    )
+
+    print(f"{len(passed_tests)} tests passed")
 
     if skipped_tests:
-        print("{} tests skipped: {}".format(len(skipped_tests), " ".join(skipped_tests)))
+        print(f'{len(skipped_tests)} tests skipped: {" ".join(skipped_tests)}')
     if failed_tests:
-        print("{} tests failed: {}".format(len(failed_tests), " ".join(failed_tests)))
+        print(f'{len(failed_tests)} tests failed: {" ".join(failed_tests)}')
 
     return not failed_tests
 
@@ -486,7 +489,7 @@ def main():
     cmd_args = cmd_parser.parse_args()
 
     # clear search path to make sure tests use only builtin modules and those in extmod
-    os.environ["MICROPYPATH"] = os.pathsep + "../extmod"
+    os.environ["MICROPYPATH"] = f"{os.pathsep}../extmod"
 
     test_files = prepare_test_file_list(cmd_args.files)
     max_instances = max(t[1] for t in test_files)
@@ -508,11 +511,13 @@ def main():
         elif cmd.startswith("pyb:"):
             instances_test.append(PyInstancePyboard(cmd[len("pyb:") :]))
         else:
-            print("unknown instance string: {}".format(cmd), file=sys.stderr)
+            print(f"unknown instance string: {cmd}", file=sys.stderr)
             sys.exit(1)
 
-    for _ in range(max_instances - len(instances_test)):
-        instances_test.append(PyInstanceSubProcess([MICROPYTHON]))
+    instances_test.extend(
+        PyInstanceSubProcess([MICROPYTHON])
+        for _ in range(max_instances - len(instances_test))
+    )
 
     all_pass = True
     try:

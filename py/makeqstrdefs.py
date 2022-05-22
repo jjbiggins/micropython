@@ -75,7 +75,7 @@ def write_out(fname, output):
     if output:
         for m, r in [("/", "__"), ("\\", "__"), (":", "@"), ("..", "@@")]:
             fname = fname.replace(m, r)
-        with open(args.output_dir + "/" + fname + "." + args.mode, "w") as f:
+        with open(f"{args.output_dir}/{fname}.{args.mode}", "w") as f:
             f.write("\n".join(output) + "\n")
 
 
@@ -94,7 +94,7 @@ def process_file(f):
         if line.startswith(("# ", "#line")):
             m = re_line.match(line)
             assert m is not None
-            fname = m.group(1)
+            fname = m[1]
             if not is_c_source(fname) and not is_cxx_source(fname):
                 continue
             if fname != last_fname:
@@ -105,7 +105,7 @@ def process_file(f):
         for match in re_match.findall(line):
             if args.mode == _MODE_QSTR:
                 name = match.replace("MP_QSTR_", "")
-                output.append("Q(" + name + ")")
+                output.append(f"Q({name})")
             elif args.mode == _MODE_COMPRESS:
                 output.append(match)
 
@@ -120,27 +120,24 @@ def cat_together():
 
     hasher = hashlib.md5()
     all_lines = []
-    outf = open(args.output_dir + "/out", "wb")
-    for fname in glob.glob(args.output_dir + "/*." + args.mode):
-        with open(fname, "rb") as f:
-            lines = f.readlines()
-            all_lines += lines
-    all_lines.sort()
-    all_lines = b"\n".join(all_lines)
-    outf.write(all_lines)
-    outf.close()
+    with open(f"{args.output_dir}/out", "wb") as outf:
+        for fname in glob.glob(f"{args.output_dir}/*.{args.mode}"):
+            with open(fname, "rb") as f:
+                lines = f.readlines()
+                all_lines += lines
+        all_lines.sort()
+        all_lines = b"\n".join(all_lines)
+        outf.write(all_lines)
     hasher.update(all_lines)
     new_hash = hasher.hexdigest()
     # print(new_hash)
     old_hash = None
     try:
-        with open(args.output_file + ".hash") as f:
+        with open(f"{args.output_file}.hash") as f:
             old_hash = f.read()
     except IOError:
         pass
-    mode_full = "QSTR"
-    if args.mode == _MODE_COMPRESS:
-        mode_full = "Compressed data"
+    mode_full = "Compressed data" if args.mode == _MODE_COMPRESS else "QSTR"
     if old_hash != new_hash:
         print(mode_full, "updated")
         try:
@@ -148,8 +145,8 @@ def cat_together():
             os.remove(args.output_file)
         except:
             pass
-        os.rename(args.output_dir + "/out", args.output_file)
-        with open(args.output_file + ".hash", "w") as f:
+        os.rename(f"{args.output_dir}/out", args.output_file)
+        with open(f"{args.output_file}.hash", "w") as f:
             f.write(new_hash)
     else:
         print(mode_full, "not updated")
@@ -157,7 +154,10 @@ def cat_together():
 
 if __name__ == "__main__":
     if len(sys.argv) < 6:
-        print("usage: %s command mode input_filename output_dir output_file" % sys.argv[0])
+        print(
+            f"usage: {sys.argv[0]} command mode input_filename output_dir output_file"
+        )
+
         sys.exit(2)
 
     class Args:
@@ -187,7 +187,7 @@ if __name__ == "__main__":
                 named_args[current_tok].append(arg)
 
         if not named_args["pp"] or len(named_args["output"]) != 1:
-            print("usage: %s %s ..." % (sys.argv[0], " ... ".join(named_args)))
+            print(f'usage: {sys.argv[0]} {" ... ".join(named_args)} ...')
             sys.exit(2)
 
         for k, v in named_args.items():
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     args.output_file = None if len(sys.argv) == 5 else sys.argv[5]  # Unused for command=split
 
     if args.mode not in (_MODE_QSTR, _MODE_COMPRESS):
-        print("error: mode %s unrecognised" % sys.argv[2])
+        print(f"error: mode {sys.argv[2]} unrecognised")
         sys.exit(2)
 
     try:

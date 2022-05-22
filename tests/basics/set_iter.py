@@ -1,5 +1,4 @@
 s = {1, 2, 3, 4}
-l = list(s)
-l.sort()
+l = sorted(s)
 print(l)
 

@@ -25,25 +25,24 @@ class GVector(object):
     def __add__(self, other):
         if not isinstance(other, GVector):
             raise ValueError("Can't add GVector to " + str(type(other)))
-        v = GVector(self.x + other.x, self.y + other.y, self.z + other.z)
-        return v
+        return GVector(self.x + other.x, self.y + other.y, self.z + other.z)
 
     def __sub__(self, other):
         return self + other * -1
 
     def __mul__(self, other):
-        v = GVector(self.x * other, self.y * other, self.z * other)
-        return v
+        return GVector(self.x * other, self.y * other, self.z * other)
 
     __rmul__ = __mul__
 
     def linear_combination(self, other, l1, l2=None):
         if l2 is None:
             l2 = 1 - l1
-        v = GVector(
-            self.x * l1 + other.x * l2, self.y * l1 + other.y * l2, self.z * l1 + other.z * l2
+        return GVector(
+            self.x * l1 + other.x * l2,
+            self.y * l1 + other.y * l2,
+            self.z * l1 + other.z * l2,
         )
-        return v
 
     def __str__(self):
         return "<%f, %f, %f>" % (self.x, self.y, self.z)
@@ -101,13 +100,14 @@ class Spline(object):
 
     def GetIndex(self, u):
         dom = self.GetDomain()
-        for ii in range(self.degree - 1, len(self.knots) - self.degree):
-            if u >= self.knots[ii] and u < self.knots[ii + 1]:
-                I = ii
-                break
-        else:
-            I = dom[1] - 1
-        return I
+        return next(
+            (
+                ii
+                for ii in range(self.degree - 1, len(self.knots) - self.degree)
+                if u >= self.knots[ii] and u < self.knots[ii + 1]
+            ),
+            dom[1] - 1,
+        )
 
     def __len__(self):
         return len(self.points)
@@ -130,10 +130,10 @@ class Chaosgame(object):
     def __init__(self, splines, thickness, subdivs):
         self.splines = splines
         self.thickness = thickness
-        self.minx = min([p.x for spl in splines for p in spl.points])
-        self.miny = min([p.y for spl in splines for p in spl.points])
-        self.maxx = max([p.x for spl in splines for p in spl.points])
-        self.maxy = max([p.y for spl in splines for p in spl.points])
+        self.minx = min(p.x for spl in splines for p in spl.points)
+        self.miny = min(p.y for spl in splines for p in spl.points)
+        self.maxx = max(p.x for spl in splines for p in spl.points)
+        self.maxy = max(p.y for spl in splines for p in spl.points)
         self.height = self.maxy - self.miny
         self.width = self.maxx - self.minx
         self.num_trafos = []
@@ -177,9 +177,6 @@ class Chaosgame(object):
         if derivative.Mag() != 0:
             basepoint.x += derivative.y / derivative.Mag() * (y - 0.5) * self.thickness
             basepoint.y += -derivative.x / derivative.Mag() * (y - 0.5) * self.thickness
-        else:
-            # can happen, especially with single precision float
-            pass
         self.truncate(basepoint)
         return basepoint
 

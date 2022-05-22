@@ -12,7 +12,7 @@ except ImportError:
 
 
 async def task(id, other):
-    for i in range(3):
+    for _ in range(3):
         try:
             print("start", id)
             await asyncio.sleep(0)

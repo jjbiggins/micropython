@@ -328,12 +328,8 @@ class WM8960:
 
         # check parameter consistency and set the sysclk value
         if sysclk_source == SYSCLK_PLL:
-            if sample_rate in (11025, 22050, 44100):
-                sysclk = 11289600
-            else:
-                sysclk = 12288000
-            if sysclk < sample_rate * 256:
-                sysclk = sample_rate * 256
+            sysclk = 11289600 if sample_rate in (11025, 22050, 44100) else 12288000
+            sysclk = max(sysclk, sample_rate * 256)
             if mclk_freq is None:
                 mclk_freq = sysclk
         else:  # sysclk_source == SYSCLK_MCLK
@@ -350,12 +346,7 @@ class WM8960:
         # Enable left and right channel input PGA, left and right output mixer
         regs[_POWER3] = 0x3C
 
-        if adc_sync == SYNC_ADC:
-            # ADC and DAC use different Frame Clock Pins
-            regs[_IFACE2] = 0x00  # ADCLRC 0x00:Input 0x40:output.
-        else:
-            # ADC and DAC use the same Frame Clock Pin
-            regs[_IFACE2] = 0x40  # ADCLRC 0x00:Input 0x40:output.
+        regs[_IFACE2] = 0x00 if adc_sync == SYNC_ADC else 0x40
         self.set_data_route(route)
         self.set_protocol(protocol)
 
@@ -410,31 +401,27 @@ class WM8960:
     def set_internal_pll_config(self, input_mclk, output_clk):
         regs = self.regs
         pllF2 = output_clk * 4
-        pll_prescale = 0
-        sysclk_div = 1
-        frac_mode = 0
-
         # disable PLL power
         regs[_POWER2] = (1, 0)
         regs[_CLOCK1] = (7, 0)
 
         pllN = pllF2 // input_mclk
+        pll_prescale = 0
         if pllN < _PLL_N_MIN_VALUE:
             input_mclk //= 2
             pll_prescale = 1
             pllN = pllF2 // input_mclk
-            if pllN < _PLL_N_MIN_VALUE:
-                sysclk_div = 2
-                pllF2 *= 2
-                pllN = pllF2 // input_mclk
+        sysclk_div = 1
+        if pllN < _PLL_N_MIN_VALUE:
+            sysclk_div = 2
+            pllF2 *= 2
+            pllN = pllF2 // input_mclk
 
         if (pllN < _PLL_N_MIN_VALUE) or (pllN > _PLL_N_MAX_VALUE):
             raise ValueError("Invalid MCLK vs. sysclk ratio")
 
         pllK = ((pllF2 % input_mclk) * (1 << 24)) // input_mclk
-        if pllK != 0:
-            frac_mode = 1
-
+        frac_mode = 1 if pllK != 0 else 0
         regs[_PLL1] = (frac_mode << 5) | (pll_prescale << 4) | (pllN & 0x0F)
         regs[_PLL2] = (pllK >> 16) & 0xFF
         regs[_PLL3] = (pllK >> 8) & 0xFF
@@ -590,7 +577,7 @@ class WM8960:
             raise ValueError("Invalid route")
 
     def set_left_input(self, input):
-        if not input in self._input_config_table.keys():
+        if input not in self._input_config_table.keys():
             raise ValueError("Invalid input")
 
         input = self._input_config_table[input]
@@ -607,7 +594,7 @@ class WM8960:
             regs[_LINVOL] = input[1]
 
     def set_right_input(self, input):
-        if not input in self._input_config_table.keys():
+        if input not in self._input_config_table.keys():
             raise ValueError("Invalid input name")
 
         input = self._input_config_table[input]
@@ -641,7 +628,7 @@ class WM8960:
         self.regs[_IFACE1] = (_IFACE1_WL_MASK, wl << _IFACE1_WL_SHIFT)
 
     def volume(self, module, volume_l=None, volume_r=None):
-        if not module in self._volume_config_table.keys():
+        if module not in self._volume_config_table.keys():
             raise ValueError("Invalid module")
 
         if volume_l is None:  # get volume
@@ -654,9 +641,9 @@ class WM8960:
             if volume_r is None:
                 volume_r = volume_l
 
-            if not ((0 <= volume_l <= 100) and (0 <= volume_r <= 100)):
+            if not 0 <= volume_l <= 100 or not 0 <= volume_r <= 100:
                 raise ValueError("Invalid value for volume")
-            elif not module in self._volume_config_table.keys():
+            elif module not in self._volume_config_table.keys():
                 raise ValueError("Invalid module")
 
             vol_max, regnum, flags = self._volume_config_table[module]
@@ -703,8 +690,7 @@ class WM8960:
     def alc_gain(self, target=-12, max_gain=30, min_gain=-17.25, noise_gate=-78):
         def limit(value, minval, maxval):
             value = int(value)
-            if value < minval:
-                value = minval
+            value = max(value, minval)
             if value > maxval:
                 value = maxval
             return value

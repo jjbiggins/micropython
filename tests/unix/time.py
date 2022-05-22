@@ -19,10 +19,7 @@ def test():
         print("Testing %d" % year)
         yday = 1
         for month in range(1, 13):
-            if month == 2 and is_leap(year):
-                DAYS_PER_MONTH[2] = 29
-            else:
-                DAYS_PER_MONTH[2] = 28
+            DAYS_PER_MONTH[2] = 29 if month == 2 and is_leap(year) else 28
             for day in range(1, DAYS_PER_MONTH[month] + 1):
                 secs = time.mktime((year, month, day, 14, 0, 0, 0, 0, 0)) + tzseconds
                 if secs != seconds:

@@ -63,7 +63,7 @@ try:
 except OSError:
     pass
 for path in uos.listdir("/"):
-    uos.umount("/" + path)
+    uos.umount(f"/{path}")
 
 # stat root dir
 print(uos.stat("/"))

@@ -2,9 +2,7 @@
 @micropython.viper
 def f():
     x = False
-    if x:
-        pass
-    else:
+    if not x:
         print("not x", x)
 
 
@@ -13,8 +11,7 @@ f()
 # using True as a conditional
 @micropython.viper
 def f():
-    x = True
-    if x:
+    if x := True:
         print("x", x)
 
 
@@ -23,8 +20,7 @@ f()
 # using an int as a conditional
 @micropython.viper
 def g():
-    y = 1
-    if y:
+    if y := 1:
         print("y", y)
 
 
@@ -33,8 +29,7 @@ g()
 # using an int as a conditional that has the lower 16-bits clear
 @micropython.viper
 def h():
-    z = 0x10000
-    if z:
+    if z := 0x10000:
         print("z", z)
 
 

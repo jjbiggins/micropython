@@ -43,10 +43,7 @@ def test(mode, sd_pin, bits_per_sample, frame_format):
         ibuf=200,
     )
 
-    if frame_format == I2S.MONO:
-        channels = 1
-    else:
-        channels = 2
+    channels = 1 if frame_format == I2S.MONO else 2
     bits_per_frame = bits_per_sample * channels
     buf_len_250ms = bits_per_frame // 8 * RATE // 4
 
@@ -62,7 +59,7 @@ def test(mode, sd_pin, bits_per_sample, frame_format):
 
     # Time how long it takes to read/write 2 lots of data.
     t0 = time.ticks_ms()
-    for i in range(2):
+    for _ in range(2):
         if mode == I2S.TX:
             i2s.write(data)
         else:

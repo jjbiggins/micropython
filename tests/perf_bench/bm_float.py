@@ -15,7 +15,7 @@ class Point(object):
         self.z = (x * x) / 2
 
     def __repr__(self):
-        return "<Point: x=%s, y=%s, z=%s>" % (self.x, self.y, self.z)
+        return f"<Point: x={self.x}, y={self.y}, z={self.z}>"
 
     def normalize(self):
         x = self.x

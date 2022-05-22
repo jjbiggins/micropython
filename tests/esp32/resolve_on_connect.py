@@ -56,4 +56,4 @@ def test_connect_non_existent():
 test_funs = [n for n in dir() if n.startswith("test_")]
 for f in sorted(test_funs):
     print("--", f, end=": ")
-    eval(f + "()")
+    eval(f"{f}()")

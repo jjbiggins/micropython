@@ -23,8 +23,8 @@ class LCD:
     def __init__(self, port):
         self.width = 128
         self.height = 32
-        self.buf1 = [[0 for x in range(self.width)] for y in range(self.height)]
-        self.buf2 = [[0 for x in range(self.width)] for y in range(self.height)]
+        self.buf1 = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        self.buf2 = [[0 for _ in range(self.width)] for _ in range(self.height)]
 
     def light(self, value):
         pass
@@ -44,10 +44,7 @@ class LCD:
             print(row)
 
     def get(self, x, y):
-        if 0 <= x < self.width and 0 <= y < self.height:
-            return self.buf1[y][x]
-        else:
-            return 0
+        return self.buf1[y][x] if 0 <= x < self.width and 0 <= y < self.height else 0
 
     def pixel(self, x, y, value):
         if 0 <= x < self.width and 0 <= y < self.height:

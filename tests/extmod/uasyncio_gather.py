@@ -13,10 +13,10 @@ except ImportError:
 async def factorial(name, number):
     f = 1
     for i in range(2, number + 1):
-        print("Task {}: Compute factorial({})...".format(name, i))
+        print(f"Task {name}: Compute factorial({i})...")
         await asyncio.sleep(0.01)
         f *= i
-    print("Task {}: factorial({}) = {}".format(name, number, f))
+    print(f"Task {name}: factorial({number}) = {f}")
     return f
 
 

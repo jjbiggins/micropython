@@ -73,7 +73,7 @@ def compute_pll(hse, sys):
         while hse > 2 * M or NbyM * M < 192:
             M += 1
         # VCO_IN must be between 1MHz and 2MHz (2MHz recommended)
-        if not (M <= hse):
+        if M > hse:
             continue
         # compute N
         N = NbyM * M
@@ -94,7 +94,7 @@ def compute_pll2(hse, sys, relax_pll48):
     fallback = None
     for P in mcu.range_p:
         # VCO_OUT must be between 192MHz and 432MHz
-        if not sys * P in mcu.range_vco_out:
+        if sys * P not in mcu.range_vco_out:
             continue
         NbyM = float(sys * P) / hse  # float for Python 2
         # scan M
@@ -124,12 +124,7 @@ def compute_pll2(hse, sys, relax_pll48):
             if fallback is None:
                 # the values don't give 48MHz on PLL48 but are otherwise OK
                 fallback = M, N, P, Q
-    if relax_pll48:
-        # might have found values which don't give 48MHz on PLL48
-        return fallback
-    else:
-        # no valid values found which give 48MHz on PLL48
-        return None
+    return fallback if relax_pll48 else None
 
 
 def compute_derived(hse, pll):
@@ -176,7 +171,7 @@ def generate_c_table(hse, valid_plls):
     if (
         mcu.range_sysclk[-1] <= 0xFF
         and mcu.range_m[-1] <= 0x3F
-        and mcu.range_p[-1] // 2 - 1 <= 0x3
+        and mcu.range_p[-1] // 2 <= 4
     ):
         typedef = "uint16_t"
         sys_mask = 0xFF
@@ -194,7 +189,7 @@ def generate_c_table(hse, valid_plls):
     print("#define PLL_FREQ_TABLE_SYS(pll) ((pll) & %d)" % (sys_mask,))
     print("#define PLL_FREQ_TABLE_M(pll) (((pll) >> %d) & %d)" % (m_shift, m_mask))
     print("#define PLL_FREQ_TABLE_P(pll) (((((pll) >> %d) & %d) + 1) * 2)" % (p_shift, p_mask))
-    print("typedef %s pll_freq_table_t;" % (typedef,))
+    print(f"typedef {typedef} pll_freq_table_t;")
     print("// (M, P/2-1, SYS) values for %u MHz source" % hse)
     print("static const pll_freq_table_t pll_freq_table[%u] = {" % (len(valid_plls),))
     for sys, (M, N, P, Q) in valid_plls:
@@ -225,16 +220,14 @@ def search_header_for_hsx_values(filename, vals):
     with open(filename) as f:
         for line in f:
             line = line.strip()
-            m = regex_inc.match(line)
-            if m:
+            if m := regex_inc.match(line):
                 # Search included file
-                search_header_for_hsx_values(m.group(1), vals)
+                search_header_for_hsx_values(m[1], vals)
                 continue
-            m = regex_def.match(line)
-            if m:
+            if m := regex_def.match(line):
                 # Found HSE_VALUE or HSI_VALUE
-                val = int(m.group(3)) // 1000000
-                if m.group(1) == "HSE_VALUE":
+                val = int(m[3]) // 1000000
+                if m[1] == "HSE_VALUE":
                     vals[0] = val
                 else:
                     vals[1] = val
@@ -273,7 +266,7 @@ def main():
         # extract HSE_VALUE, and optionally HSI_VALUE, from header file
         hse, hsi = search_header_for_hsx_values(argv[0][5:], [None, None])
         if hse is None:
-            raise ValueError("%s does not contain a definition of HSE_VALUE" % argv[0])
+            raise ValueError(f"{argv[0]} does not contain a definition of HSE_VALUE")
         if hsi is not None and hsi > 16:
             # Currently, a HSI value greater than 16MHz is not supported
             hsi = None

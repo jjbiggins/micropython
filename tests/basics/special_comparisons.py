@@ -29,5 +29,5 @@ def test(s):
 
 for x in 'abcd':
     for y in 'abcd':
-        test('{} == {}'.format(x,y))
-        test('{} != {}'.format(x,y))
+        test(f'{x} == {y}')
+        test(f'{x} != {y}')

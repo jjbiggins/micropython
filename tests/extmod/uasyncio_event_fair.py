@@ -12,13 +12,13 @@ except ImportError:
 
 
 async def task1(id):
-    for i in range(4):
+    for _ in range(4):
         print("sleep", id)
         await asyncio.sleep(0)
 
 
 async def task2(id, ev):
-    for i in range(4):
+    for _ in range(4):
         ev.set()
         ev.clear()
         print("wait", id)

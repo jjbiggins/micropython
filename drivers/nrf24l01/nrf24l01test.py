@@ -1,5 +1,6 @@
 """Test for nrf24l01 module.  Portable between MicroPython targets."""
 
+
 import usys
 import ustruct as struct
 import utime
@@ -21,7 +22,7 @@ elif usys.platform == "esp8266":  # Hardware SPI
 elif usys.platform == "esp32":  # Software SPI
     cfg = {"spi": -1, "miso": 32, "mosi": 33, "sck": 25, "csn": 26, "ce": 27}
 else:
-    raise ValueError("Unsupported platform {}".format(usys.platform))
+    raise ValueError(f"Unsupported platform {usys.platform}")
 
 # Addresses are in little-endian format. They correspond to big-endian
 # 0xf0f0f0f0e1, 0xf0f0f0f0d2

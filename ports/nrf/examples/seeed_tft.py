@@ -218,9 +218,9 @@ class ILI9341:
 
         num_of_pixels = self.height * self.width
 
-        for row in range(0, self.pages):
-            for pixel_pos in range(0, 8):
-                for col in range(0, self.width):
+        for row in range(self.pages):
+            for pixel_pos in range(8):
+                for col in range(self.width):
                     compressed_pixel = self.buffer[row * 240 + col]
                     if ((compressed_pixel >> pixel_pos) & 0x1) == 0:
                         self.write_data(bytearray([0x00, 0x00]))

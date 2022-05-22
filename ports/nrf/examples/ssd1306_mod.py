@@ -43,7 +43,7 @@ class SSD1306_I2C_Mod(SSD1306_I2C):
         num_of_chunks = len(self.buffer) // chunk_size
         leftover = len(self.buffer) - (num_of_chunks * chunk_size)
 
-        for i in range(0, num_of_chunks):
+        for i in range(num_of_chunks):
             self.write_data(self.buffer[chunk_size * i : chunk_size * (i + 1)])
         if leftover > 0:
             self.write_data(self.buffer[chunk_size * num_of_chunks :])

@@ -64,7 +64,7 @@ async def main():
     t1 = ticks()
     await ts2
     t2 = ticks()
-    print("took {} {}".format(round(ticks_diff(t1, t0), -2), round(ticks_diff(t2, t1), -2)))
+    print(f"took {round(ticks_diff(t1, t0), -2)} {round(ticks_diff(t2, t1), -2)}")
 
     # Wait on a task that raises an exception
     t = asyncio.create_task(task_raise())

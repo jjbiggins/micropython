@@ -119,13 +119,13 @@ class LSM6DSOX:
         accel_odr = round(accel_odr, 2)
 
         # Sanity checks
-        if not gyro_odr in ODR:
+        if gyro_odr not in ODR:
             raise ValueError("Invalid sampling rate: %d" % accel_odr)
-        if not gyro_scale in SCALE_GYRO:
+        if gyro_scale not in SCALE_GYRO:
             raise ValueError("invalid gyro scaling: %d" % gyro_scale)
-        if not accel_odr in ODR:
+        if accel_odr not in ODR:
             raise ValueError("Invalid sampling rate: %d" % accel_odr)
-        if not accel_scale in SCALE_ACCEL:
+        if accel_scale not in SCALE_ACCEL:
             raise ValueError("invalid accelerometer scaling: %d" % accel_scale)
 
         # Soft-reset the device.
@@ -159,7 +159,7 @@ class LSM6DSOX:
 
     def reset(self):
         self.__write_reg(_CTRL3_C, self.__read_reg(_CTRL3_C) | 0x1)
-        for i in range(0, 10):
+        for _ in range(10):
             if (self.__read_reg(_CTRL3_C) & 0x01) == 0:
                 return
             time.sleep_ms(10)

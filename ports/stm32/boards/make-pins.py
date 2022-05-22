@@ -96,7 +96,7 @@ def split_name_num(name_num):
     num = None
     for num_idx in range(len(name_num) - 1, -1, -1):
         if not name_num[num_idx].isdigit():
-            name = name_num[0 : num_idx + 1]
+            name = name_num[:num_idx + 1]
             num_str = name_num[num_idx + 1 :]
             if len(num_str) > 0:
                 num = int(num_str)
@@ -173,7 +173,7 @@ class AlternateFunction(object):
         """Prints the C representation of this AF."""
         cond_var = None
         if self.supported:
-            cond_var = conditional_var("{}{}".format(self.func, self.fn_num))
+            cond_var = conditional_var(f"{self.func}{self.fn_num}")
             print_conditional_if(cond_var)
             print("  AF", end="")
         else:
@@ -221,13 +221,7 @@ class Pin(object):
             return
         adc, channel = None, None
 
-        if adc_str.find("_INP") != -1:
-            # STM32H7xx, entries have the form: ADCxx_IN[PN]yy/...
-            sep = "_INP"
-        else:
-            # all other MCUs, entries have the form: ADCxx_INyy
-            sep = "_IN"
-
+        sep = "_INP" if adc_str.find("_INP") != -1 else "_IN"
         # Pick the entry with the most ADC peripherals
         for ss in adc_str.split("/"):
             if ss.find(sep) != -1:
@@ -379,8 +373,7 @@ class Pins(object):
                     (port_num, pin_num) = parse_port_pin(cpu_pin_name)
                 except:
                     continue
-                named_pin = self.find_pin(port_num, pin_num)
-                if named_pin:
+                if named_pin := self.find_pin(port_num, pin_num):
                     named_pin.set_hidden(cpu_pin_hidden)
                     pin = named_pin.pin()
                     pin.set_is_board_pin()
@@ -425,11 +418,7 @@ class Pins(object):
                 and (pin.adc_num & (1 << (adc_num - 1)))
             ):
                 adc_pins[pin.adc_channel] = pin
-        if adc_pins:
-            table_size = max(adc_pins) + 1
-        else:
-            # If ADCx pins are hidden, print an empty table to prevent linker errors.
-            table_size = 0
+        table_size = max(adc_pins) + 1 if adc_pins else 0
         self.adc_table_size[adc_num] = table_size
         print("")
         print("const pin_obj_t * const pin_adc{:d}[{:d}] = {{".format(adc_num, table_size))
@@ -469,17 +458,17 @@ class Pins(object):
                 pin = named_pin.pin()
                 if pin.is_board_pin():
                     qstr_set |= set(pin.qstr_list())
-                    qstr_set |= set([named_pin.name()])
+                    qstr_set |= {named_pin.name()}
             for named_pin in self.board_pins:
                 if not named_pin.is_hidden():
-                    qstr_set |= set([named_pin.name()])
+                    qstr_set |= {named_pin.name()}
             for qstr in sorted(qstr_set):
                 cond_var = None
                 if qstr.startswith("AF"):
                     af_words = qstr.split("_")
                     cond_var = conditional_var(af_words[1])
                     print_conditional_if(cond_var, file=qstr_file)
-                print("Q({})".format(qstr), file=qstr_file)
+                print(f"Q({qstr})", file=qstr_file)
                 print_conditional_endif(cond_var, file=qstr_file)
 
     def print_af_hdr(self, af_const_filename):
@@ -492,15 +481,15 @@ class Pins(object):
                     for af in pin.alt_fn:
                         if af.is_supported():
                             mux_name = af.mux_name()
-                            af_hdr_set |= set([mux_name])
+                            af_hdr_set |= {mux_name}
                             if len(mux_name) > mux_name_width:
                                 mux_name_width = len(mux_name)
             for mux_name in sorted(af_hdr_set):
                 af_words = mux_name.split("_")  # ex mux_name: AF9_I2C2
                 cond_var = conditional_var(af_words[1])
                 print_conditional_if(cond_var, file=af_const_file)
-                key = "MP_ROM_QSTR(MP_QSTR_{}),".format(mux_name)
-                val = "MP_ROM_INT(GPIO_{})".format(mux_name)
+                key = f"MP_ROM_QSTR(MP_QSTR_{mux_name}),"
+                val = f"MP_ROM_INT(GPIO_{mux_name})"
                 print("    { %-*s %s }," % (mux_name_width + 26, key, val), file=af_const_file)
                 print_conditional_endif(cond_var, file=af_const_file)
 

@@ -26,7 +26,7 @@ def split_name_num(name_num):
     num = None
     for num_idx in range(len(name_num) - 1, -1, -1):
         if not name_num[num_idx].isdigit():
-            name = name_num[0 : num_idx + 1]
+            name = name_num[:num_idx + 1]
             num_str = name_num[num_idx + 1 :]
             if len(num_str) > 0:
                 num = int(num_str)
@@ -237,8 +237,7 @@ class Pins(object):
                     pin_num = parse_pin(row[1])
                 except:
                     continue
-                pin = self.find_pin(pin_num)
-                if pin:
+                if pin := self.find_pin(pin_num):
                     pin.set_is_board_pin()
                     self.board_pins.append(NamedPin(row[0], pin))
 
@@ -319,11 +318,11 @@ class Pins(object):
                 pin = named_pin.pin()
                 if pin.is_board_pin():
                     qstr_set |= set(pin.qstr_list())
-                    qstr_set |= set([named_pin.name()])
+                    qstr_set |= {named_pin.name()}
             for named_pin in self.board_pins:
-                qstr_set |= set([named_pin.name()])
+                qstr_set |= {named_pin.name()}
             for qstr in sorted(qstr_set):
-                print("Q({})".format(qstr), file=qstr_file)
+                print(f"Q({qstr})", file=qstr_file)
 
     def print_af_hdr(self, af_const_filename):
         with open(af_const_filename, "wt") as af_const_file:
@@ -335,12 +334,12 @@ class Pins(object):
                     for af in pin.alt_fn:
                         if af.is_supported():
                             mux_name = af.mux_name()
-                            af_hdr_set |= set([mux_name])
+                            af_hdr_set |= {mux_name}
                             if len(mux_name) > mux_name_width:
                                 mux_name_width = len(mux_name)
             for mux_name in sorted(af_hdr_set):
-                key = "MP_ROM_QSTR(MP_QSTR_{}),".format(mux_name)
-                val = "MP_ROM_INT(GPIO_{})".format(mux_name)
+                key = f"MP_ROM_QSTR(MP_QSTR_{mux_name}),"
+                val = f"MP_ROM_INT(GPIO_{mux_name})"
                 print("    { %-*s %s }," % (mux_name_width + 26, key, val), file=af_const_file)
 
     def print_af_py(self, af_py_filename):

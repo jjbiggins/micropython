@@ -31,7 +31,7 @@ def instance0():
         s.bind(socket.getaddrinfo("0.0.0.0", PORT + i)[0][-1])
         s.settimeout(0.250)
         multitest.broadcast("server ready")
-        for j in range(NUM_TRANSFERS):
+        for _ in range(NUM_TRANSFERS):
             try:
                 data, addr = s.recvfrom(1000)
             except:
@@ -55,7 +55,7 @@ def instance1():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(0.250)
         multitest.wait("server ready")
-        for j in range(NUM_TRANSFERS):
+        for _ in range(NUM_TRANSFERS):
             s.sendto(b"%d" % (seq), ai)
             try:
                 data, addr = s.recvfrom(1000)

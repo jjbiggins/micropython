@@ -23,10 +23,7 @@ class UserFile(uio.IOBase):
         self.pos = 0
 
     def read(self):
-        if self.is_text:
-            return str(self.data, "utf8")
-        else:
-            return self.data
+        return str(self.data, "utf8") if self.is_text else self.data
 
     def readinto(self, buf):
         assert not self.is_text

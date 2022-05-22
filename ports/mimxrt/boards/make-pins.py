@@ -34,11 +34,7 @@ def parse_pad(pad_str):
 
 
 def af_supported(af_str):
-    for supported_af in SUPPORTED_AFS:
-        if af_str.startswith(supported_af):
-            return True
-    else:
-        return False
+    return any(af_str.startswith(supported_af) for supported_af in SUPPORTED_AFS)
 
 
 class Pin(object):
@@ -76,17 +72,16 @@ class Pin(object):
         self.alt_fn.append(af)
 
     def print_pin_af(self):
-        if self.alt_fn:
-            print(
-                "static const machine_pin_af_obj_t pin_{0}_af[{1}] = {{".format(
-                    self.name, len(self.alt_fn)
-                )
+        if not self.alt_fn:
+            raise ValueError(f"Pin '{self.name}' has no alternative functions")
+        print(
+            "static const machine_pin_af_obj_t pin_{0}_af[{1}] = {{".format(
+                self.name, len(self.alt_fn)
             )
-            for af in self.alt_fn:
-                af.print()
-            print("};")
-        else:
-            raise ValueError("Pin '{}' has no alternative functions".format(self.name))
+        )
+        for af in self.alt_fn:
+            af.print()
+        print("};")
 
     def print_pin_adc(self):
         if self.adc_fns:
@@ -100,24 +95,23 @@ class Pin(object):
             print("};")
 
     def print(self):
-        if self.alt_fn:
-            self.print_pin_af()
-            self.print_pin_adc()
+        if not self.alt_fn:
+            raise ValueError(f"Pin '{self.name}' has no alternative functions")
+        self.print_pin_af()
+        self.print_pin_adc()
 
-            if self.adc_fns:
-                print(
-                    "const machine_pin_obj_t pin_{0} = PIN({0}, {1}, {2}, pin_{0}_af, {3}, pin_{0}_adc);\n".format(
-                        self.name, self.gpio, int(self.pin), len(self.adc_fns)
-                    )
+        if self.adc_fns:
+            print(
+                "const machine_pin_obj_t pin_{0} = PIN({0}, {1}, {2}, pin_{0}_af, {3}, pin_{0}_adc);\n".format(
+                    self.name, self.gpio, int(self.pin), len(self.adc_fns)
                 )
-            else:
-                print(
-                    "const machine_pin_obj_t pin_{0} = PIN({0}, {1}, {2}, pin_{0}_af, {3}, NULL);\n".format(
-                        self.name, self.gpio, int(self.pin), len(self.adc_fns)
-                    )
-                )
+            )
         else:
-            raise ValueError("Pin '{}' has no alternative functions".format(self.name))
+            print(
+                "const machine_pin_obj_t pin_{0} = PIN({0}, {1}, {2}, pin_{0}_af, {3}, NULL);\n".format(
+                    self.name, self.gpio, int(self.pin), len(self.adc_fns)
+                )
+            )
 
     def print_header(self, hdr_file):
         pass
@@ -193,7 +187,7 @@ class Pins(object):
     def parse_af_file(self, filename, iomux_filename, pad_col, af_start_col):
         af_end_col = af_start_col + MAX_AF
 
-        iomux_pin_config = dict()
+        iomux_pin_config = {}
 
         with open(iomux_filename, "r") as ipt:
             input_str = ipt.read()
@@ -264,7 +258,7 @@ class Pins(object):
         print("")
         print("const machine_pin_obj_t* machine_pin_board_pins [] = {")
         for pin in self.board_pins:
-            print("    &pin_{},".format(pin.pad))
+            print(f"    &pin_{pin.pad},")
         print("};")
         print("const uint32_t num_board_pins = {:d};".format(len(self.board_pins)))
         # Print Pin mapping dictionaries
@@ -288,9 +282,12 @@ class Pins(object):
 
 
 def module_instance_factory(pins, output_file, name):
-    module_pin = filter(lambda p: any([af for af in p.alt_fn if name in af.af_str]), pins)
+    module_pin = filter(
+        lambda p: any(af for af in p.alt_fn if name in af.af_str), pins
+    )
 
-    module_instances = dict()
+
+    module_instances = {}
     for pin in module_pin:
         for idx, alt_fn in enumerate(pin.alt_fn):
             if name in alt_fn.instance:

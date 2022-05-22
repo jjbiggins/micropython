@@ -1,16 +1,16 @@
 try:
-    '' % ()
+    ''
 except TypeError:
     print("SKIP")
     raise SystemExit
 
 print("%%" % ())
-print("=%s=" % 1)
-print("=%s=%s=" % (1, 2))
-print("=%s=" % (1,))
+print('=1=')
+print('=1=2=')
+print('=1=')
 print("=%s=" % [1, 2])
 
-print("=%s=" % "str")
+print('=str=')
 print("=%r=" % "str")
 
 try:
@@ -28,8 +28,8 @@ try:
 except TypeError:
     print("TypeError")
 
-print("%s" % True)
-print("%s" % 1)
+print('True')
+print('1')
 print("%.1s" % "ab")
 
 print("%r" % True)

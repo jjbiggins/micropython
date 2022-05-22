@@ -2,15 +2,14 @@
 Pin IRQ test for the CC3200 based boards.
 """
 
+
 from machine import Pin
 import machine
 import os
 import time
 
 mch = os.uname().machine
-if "LaunchPad" in mch:
-    pins = ["GP16", "GP13"]
-elif "WiPy" in mch:
+if "LaunchPad" in mch or "WiPy" in mch:
     pins = ["GP16", "GP13"]
 else:
     raise Exception("Board not supported!")
@@ -32,7 +31,7 @@ pin_irq_count_trigger = 0
 pin_irq_count_total = 0
 _trigger = Pin.IRQ_FALLING
 pin1_irq = pin1.irq(trigger=_trigger, handler=pin_handler)
-for i in range(0, 10):
+for _ in range(10):
     pin0.toggle()
     time.sleep_ms(5)
 print(pin_irq_count_trigger == 5)
@@ -42,7 +41,7 @@ pin_irq_count_trigger = 0
 pin_irq_count_total = 0
 _trigger = Pin.IRQ_RISING
 pin1_irq = pin1.irq(trigger=_trigger, handler=pin_handler)
-for i in range(0, 200):
+for _ in range(200):
     pin0.toggle()
     time.sleep_ms(5)
 print(pin_irq_count_trigger == 100)
@@ -71,7 +70,7 @@ print(pin_irq_count_total == 2)
 pin1_irq.disable()
 pin_irq_count_trigger = 0
 pin_irq_count_total = 0
-for i in range(0, 10):
+for _ in range(10):
     pin0.toggle()
     time.sleep_ms(5)
 print(pin_irq_count_trigger == 0)
@@ -94,7 +93,7 @@ print(time.ticks_ms() - t0 < 10)
 print("Awake")
 
 # check for memory leaks
-for i in range(0, 1000):
+for _ in range(1000):
     pin0_irq = pin0.irq(trigger=_trigger, handler=pin_handler)
     pin1_irq = pin1.irq(trigger=_trigger, handler=pin_handler)
 

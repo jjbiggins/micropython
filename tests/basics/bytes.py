@@ -13,7 +13,7 @@ print(str(bytes(), 'utf-8'))
 
 a = b"123"
 print(a)
-print(str(a))
+print(a)
 print(repr(a))
 print(a[0], a[2])
 print(a[-1])
@@ -24,9 +24,7 @@ try:
 except TypeError:
     print("TypeError")
 
-s = 0
-for i in a:
-    s += i
+s = sum(a)
 print(s)
 
 

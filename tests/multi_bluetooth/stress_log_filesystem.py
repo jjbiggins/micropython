@@ -72,21 +72,17 @@ def irq(event, data):
     elif event == _IRQ_PERIPHERAL_DISCONNECT:
         print("_IRQ_PERIPHERAL_DISCONNECT")
     elif event == _IRQ_GATTC_SERVICE_RESULT:
-        # conn_handle, start_handle, end_handle, uuid = data
-        if data[-1] == SERVICE_UUID:
-            print("_IRQ_GATTC_SERVICE_RESULT", data[3])
-            waiting_events[event] = (data[1], data[2])
-        else:
+        if data[-1] != SERVICE_UUID:
             return
+        print("_IRQ_GATTC_SERVICE_RESULT", data[3])
+        waiting_events[event] = (data[1], data[2])
     elif event == _IRQ_GATTC_SERVICE_DONE:
         print("_IRQ_GATTC_SERVICE_DONE")
     elif event == _IRQ_GATTC_CHARACTERISTIC_RESULT:
-        # conn_handle, def_handle, value_handle, properties, uuid = data
-        if data[-1] == CHAR_UUID:
-            print("_IRQ_GATTC_CHARACTERISTIC_RESULT", data[-1])
-            waiting_events[event] = data[2]
-        else:
+        if data[-1] != CHAR_UUID:
             return
+        print("_IRQ_GATTC_CHARACTERISTIC_RESULT", data[-1])
+        waiting_events[event] = data[2]
     elif event == _IRQ_GATTC_CHARACTERISTIC_DONE:
         print("_IRQ_GATTC_CHARACTERISTIC_DONE")
     elif event == _IRQ_GATTC_READ_RESULT:
@@ -111,7 +107,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.
@@ -125,12 +121,12 @@ def instance0():
     ((char_handle,),) = ble.gatts_register_services(SERVICES)
     multitest.next()
     try:
-        for repeat in range(2):
+        for _ in range(2):
             print("gap_advertise")
             ble.gap_advertise(50_000, b"\x02\x01\x06\x04\xffMPY")
             # Wait for central to connect, do a sequence of read/write, then disconnect.
             wait_for_event(_IRQ_CENTRAL_CONNECT, TIMEOUT_MS)
-            for op in range(4):
+            for _ in range(4):
                 wait_for_event(_IRQ_GATTS_READ_REQUEST, TIMEOUT_MS)
                 wait_for_event(_IRQ_GATTS_WRITE, TIMEOUT_MS)
             wait_for_event(_IRQ_CENTRAL_DISCONNECT, 2 * TIMEOUT_MS)
@@ -149,7 +145,7 @@ def instance1():
     ble.irq(irq)
     multitest.next()
     try:
-        for repeat in range(2):
+        for _ in range(2):
             # Connect to peripheral and then disconnect.
             print("gap_connect")
             ble.gap_connect(BDADDR[0], BDADDR[1], 5000)
@@ -173,7 +169,7 @@ def instance1():
                 wait_for_event(_IRQ_GATTC_READ_RESULT, TIMEOUT_MS)
                 wait_for_event(_IRQ_GATTC_READ_DONE, TIMEOUT_MS)
                 print("gattc_write")
-                ble.gattc_write(conn_handle, value_handle, "{}".format(op), 1)
+                ble.gattc_write(conn_handle, value_handle, f"{op}", 1)
                 wait_for_event(_IRQ_GATTC_WRITE_DONE, TIMEOUT_MS)
 
             # Disconnect.

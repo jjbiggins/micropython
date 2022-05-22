@@ -9,7 +9,7 @@ print('\z') # unrecognised escape char
 
 # construction
 print(str())
-print(str('abc'))
+print('abc')
 
 # inplace addition
 x = 'abc'

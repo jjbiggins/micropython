@@ -25,6 +25,7 @@
 Utility to create compressed, encrypted and signed DFU files.
 """
 
+
 import argparse
 import os
 import re
@@ -32,7 +33,7 @@ import struct
 import sys
 import zlib
 
-sys.path.append(os.path.dirname(__file__) + "/../../../tools")
+sys.path.append(f"{os.path.dirname(__file__)}/../../../tools")
 import dfu
 
 try:
@@ -72,9 +73,9 @@ class Keys:
         file_.write("{}const uint8_t {}[] = {{{}}};\n".format(prefix, name, data))
 
     def _load_data(self, name, line):
-        line = line.split(name + "[] = ")
+        line = line.split(f"{name}[] = ")
         if len(line) != 2:
-            raise Exception("malformed input keys: {}".format(line))
+            raise Exception(f"malformed input keys: {line}")
         data = line[1].strip()
         return bytes(int(value, 16) for value in data[1:-2].split(","))
 
@@ -104,13 +105,13 @@ def dfu_read(filename):
         sig, ver, size, num_targ = struct.unpack("<5sBIB", hdr)
         file_offset = 11
 
-        for i in range(num_targ):
+        for _ in range(num_targ):
             hdr = f.read(274)
             sig, alt, has_name, name, t_size, num_elem = struct.unpack("<6sBi255sII", hdr)
 
             file_offset += 274
             file_offset_t = file_offset
-            for j in range(num_elem):
+            for _ in range(num_elem):
                 hdr = f.read(8)
                 addr, e_size = struct.unpack("<II", hdr)
                 data = f.read(e_size)
@@ -118,10 +119,10 @@ def dfu_read(filename):
                 file_offset += 8 + e_size
 
             if t_size != file_offset - file_offset_t:
-                raise Exception("corrupt DFU {} {}".format(t_size, file_offset - file_offset_t))
+                raise Exception(f"corrupt DFU {t_size} {file_offset - file_offset_t}")
 
         if size != file_offset:
-            raise Exception("corrupt DFU {} {}".format(size, file_offset))
+            raise Exception(f"corrupt DFU {size} {file_offset}")
 
         hdr = f.read(16)
         hdr = struct.unpack("<HHHH3sBI", hdr)

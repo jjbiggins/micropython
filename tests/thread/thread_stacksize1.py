@@ -8,10 +8,7 @@ except ImportError:
 import _thread
 
 # different implementations have different minimum sizes
-if sys.implementation.name == "micropython":
-    sz = 2 * 1024
-else:
-    sz = 512 * 1024
+sz = 2 * 1024 if sys.implementation.name == "micropython" else 512 * 1024
 
 
 def foo():
@@ -40,7 +37,7 @@ n_finished = 0
 
 # set stack size and spawn a few threads
 _thread.stack_size(sz)
-for i in range(n_thread):
+for _ in range(n_thread):
     while True:
         try:
             _thread.start_new_thread(thread_entry, ())

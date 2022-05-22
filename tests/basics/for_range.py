@@ -8,8 +8,7 @@ for x in range(1, *(6, 2)):
 
 # zero step
 try:
-    for x in range(1, 2, 0):
-        pass
+    pass
 except ValueError:
     print('ValueError')
 
@@ -54,17 +53,17 @@ except TypeError:
 
 # argument is a comprehension
 try:
-    for x in range(0 for i in []):
+    for x in range(0 for _ in []):
         print(x)
 except TypeError:
     print('TypeError')
 try:
-    for x in range(0, (0 for i in [])):
+    for x in range(0 for _ in []):
         print(x)
 except TypeError:
     print('TypeError')
 try:
-    for x in range(0, 1, (0 for i in [])):
+    for x in range(0, 1, (0 for _ in [])):
         print(x)
 except TypeError:
     print('TypeError')

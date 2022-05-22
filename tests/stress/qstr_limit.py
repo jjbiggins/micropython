@@ -7,11 +7,11 @@ def make_id(n, base="a"):
 
 
 # identifiers in parser
+g = {}
 for l in range(254, 259):
-    g = {}
     var = make_id(l)
     try:
-        exec(var + "=1", g)
+        exec(f"{var}=1", g)
     except RuntimeError:
         print("RuntimeError", l)
         continue
@@ -24,7 +24,7 @@ def f(**k):
 
 for l in range(254, 259):
     try:
-        exec("f({}=1)".format(make_id(l)))
+        exec(f"f({make_id(l)}=1)")
     except RuntimeError:
         print("RuntimeError", l)
 
@@ -36,7 +36,6 @@ for l in range(254, 259):
     except RuntimeError:
         print("RuntimeError", l)
 
-# hasattr, setattr, getattr
 class A:
     pass
 
@@ -65,7 +64,7 @@ for l in range(254, 259):
 for l in range(254, 259):
     id = make_id(l)
     try:
-        print(("%(" + id + ")d") % {id: l})
+        print(f"%({id})d" % {id: l})
     except RuntimeError:
         print("RuntimeError", l)
 
@@ -82,7 +81,7 @@ for l in (100, 101, 256, 257, 258):
 # import package
 for l in (100, 101, 102, 128, 129):
     try:
-        exec("import " + make_id(l) + "." + make_id(l, "A"))
+        exec(f"import {make_id(l)}." + make_id(l, "A"))
     except ImportError:
         print("ok", l)
     except RuntimeError:

@@ -2,7 +2,7 @@
 
 try:
     fail
-except (Exception,):
+except Exception:
     print('except 1')
 
 try:
@@ -17,5 +17,5 @@ except (TypeError, NameError):
 
 try:
     fail
-except (TypeError, ValueError, Exception):
+except Exception:
     print('except 4')
