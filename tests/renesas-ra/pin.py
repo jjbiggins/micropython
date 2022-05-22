@@ -14,8 +14,8 @@ if str(p) == try_s:
     print("OK")
 else:
     print("NG")
-    print("exp: " + try_s)
-    print("out: " + str(p))
+    print(f"exp: {try_s}")
+    print(f"out: {str(p)}")
 
 p = Pin("SW1", Pin.IN, Pin.PULL_UP)
 if p.mode() != 1:

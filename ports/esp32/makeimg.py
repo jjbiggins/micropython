@@ -11,7 +11,7 @@ OFFSET_PARTITIONS_DEFAULT = 0x8000
 
 
 def load_sdkconfig_value(filename, value, default):
-    value = "CONFIG_" + value + "="
+    value = f"CONFIG_{value}="
     with open(filename, "r") as f:
         for line in f:
             if line.startswith(value):

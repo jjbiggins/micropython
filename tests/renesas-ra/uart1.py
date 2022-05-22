@@ -47,5 +47,5 @@ if str(ch) == try_s:
     print("OK")
 else:
     print("NG")
-    print("exp: " + try_s)
-    print("out: " + str(ch))
+    print(f"exp: {try_s}")
+    print(f"out: {str(ch)}")

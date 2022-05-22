@@ -40,11 +40,7 @@ async def main():
     t3 = ticks()
 
     print(
-        "took {} {} {}".format(
-            round(ticks_diff(t1, t0), -2),
-            round(ticks_diff(t2, t1), -2),
-            round(ticks_diff(t3, t2), -2),
-        )
+        f"took {round(ticks_diff(t1, t0), -2)} {round(ticks_diff(t2, t1), -2)} {round(ticks_diff(t3, t2), -2)}"
     )
 
 

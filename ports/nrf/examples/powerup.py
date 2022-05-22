@@ -43,20 +43,19 @@ from ubluepy import Peripheral, Scanner, constants
 
 
 def bytes_to_str(bytes):
-    string = ""
-    for b in bytes:
-        string += chr(b)
-    return string
+    return "".join(chr(b) for b in bytes)
 
 
 def get_device_names(scan_entries):
     dev_names = []
     for e in scan_entries:
-        scan = e.getScanData()
-        if scan:
-            for s in scan:
-                if s[0] == constants.ad_types.AD_TYPE_COMPLETE_LOCAL_NAME:
-                    dev_names.append((e, bytes_to_str(s[2])))
+        if scan := e.getScanData():
+            dev_names.extend(
+                (e, bytes_to_str(s[2]))
+                for s in scan
+                if s[0] == constants.ad_types.AD_TYPE_COMPLETE_LOCAL_NAME
+            )
+
     return dev_names
 
 
@@ -120,13 +119,13 @@ class PowerUp3:
         return int(self.char_batt_lvl.read()[0])
 
     def speed(self, new_speed=None):
-        if new_speed == None:
+        if new_speed is None:
             return int(self.char_control_speed.read()[0])
         else:
             self.char_control_speed.write(bytearray([new_speed]))
 
     def angle(self, new_angle=None):
-        if new_angle == None:
+        if new_angle is None:
             return int(self.char_control_angle.read()[0])
         else:
             self.char_control_angle.write(bytearray([new_angle]))
@@ -211,7 +210,4 @@ class PowerUp3:
                 new_speed = 200
             elif self.button_speed_off():
                 new_speed = 0
-            else:
-                pass
-
             self.throttle(new_speed)

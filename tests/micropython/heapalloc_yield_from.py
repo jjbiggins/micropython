@@ -4,8 +4,7 @@ import micropython
 
 # Yielding from a function generator
 def sub_gen(a):
-    for i in range(a):
-        yield i
+    yield from range(a)
 
 
 def gen(g):

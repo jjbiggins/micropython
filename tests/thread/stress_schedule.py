@@ -35,7 +35,7 @@ def thread():
             utime.sleep_ms(10)
 
 
-for i in range(8):
+for _ in range(8):
     _thread.start_new_thread(thread, ())
 
 # Wait up to 10 seconds for 10000 tasks to be scheduled.

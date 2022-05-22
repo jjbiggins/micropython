@@ -72,13 +72,14 @@ def mimxrt_default_parser(defines_file, features_file, ld_script):
     fsl_bank_nbr_match = re.search(fsl_bank_nbr_regex, input_str, re.MULTILINE)
     #
     extract = {
-        "ocram_size": int(ocram_match.group("size"), 16),
-        "dtcm_size": int(dtcm_match.group("size"), 16),
-        "itcm_size": int(itcm_match.group("size"), 16),
-        "gpr_base_addr": int(mcu_define_file_match.group("base_addr"), 16),
-        "fsl_ram_bank_size": int(fsl_ram_bank_size_match.group("size")),
-        "fsl_bank_nbr": int(fsl_bank_nbr_match.group("number")),
+        "ocram_size": int(ocram_match["size"], 16),
+        "dtcm_size": int(dtcm_match["size"], 16),
+        "itcm_size": int(itcm_match["size"], 16),
+        "gpr_base_addr": int(mcu_define_file_match["base_addr"], 16),
+        "fsl_ram_bank_size": int(fsl_ram_bank_size_match["size"]),
+        "fsl_bank_nbr": int(fsl_bank_nbr_match["number"]),
     }
+
     # Evaluate configuration
     if extract["ocram_size"] < ocram_min_size:
         raise ValueError("OCRAM size must be at least {:08X}!".format(ocram_min_size))
@@ -87,15 +88,21 @@ def mimxrt_default_parser(defines_file, features_file, ld_script):
         raise ValueError("Configuration invalid!")
 
     # Check if DTCM and ITCM size is either multiple of 32k or 4k,8k or 16k
-    if extract["dtcm_size"] != 0x0:
-        if extract["dtcm_size"] % extract["fsl_ram_bank_size"] != 0:
-            if extract["dtcm_size"] not in (0x00000000, 0x00001000, 0x00002000, 0x00004000):
-                raise ValueError("Configuration invalid!")
+    if (
+        extract["dtcm_size"] != 0x0
+        and extract["dtcm_size"] % extract["fsl_ram_bank_size"] != 0
+        and extract["dtcm_size"]
+        not in (0x00000000, 0x00001000, 0x00002000, 0x00004000)
+    ):
+        raise ValueError("Configuration invalid!")
 
-    if extract["itcm_size"] != 0x0:
-        if extract["itcm_size"] % extract["fsl_ram_bank_size"] != 0:
-            if extract["itcm_size"] not in (0x00000000, 0x00001000, 0x00002000, 0x00004000):
-                raise ValueError("Configuration invalid!")
+    if (
+        extract["itcm_size"] != 0x0
+        and extract["itcm_size"] % extract["fsl_ram_bank_size"] != 0
+        and extract["itcm_size"]
+        not in (0x00000000, 0x00001000, 0x00002000, 0x00004000)
+    ):
+        raise ValueError("Configuration invalid!")
     #
     return extract
 

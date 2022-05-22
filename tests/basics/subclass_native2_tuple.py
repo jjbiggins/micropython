@@ -20,7 +20,7 @@ print(len(a))
 a = Ctuple2([1, 2, 3])
 print(len(a))
 
-a = tuple([1,2,3])
+a = 1, 2, 3
 b = Ctuple1([1,2,3])
 c = Ctuple2([1,2,3])
 

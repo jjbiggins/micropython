@@ -15,11 +15,10 @@ def check_non_ascii(msg):
     for c in msg:
         if ord(c) >= 0x80:
             print(
-                'Unable to generate compressed data: message "{}" contains a non-ascii character "{}".'.format(
-                    msg, c
-                ),
+                f'Unable to generate compressed data: message "{msg}" contains a non-ascii character "{c}".',
                 file=sys.stderr,
             )
+
             sys.exit(1)
 
 
@@ -94,9 +93,10 @@ def huffman_compression(error_strings):
         n = len(b)
         if n % 8 != 0:
             n += 8 - (n % 8)
-        result = ""
-        for i in range(0, n, 8):
-            result += "\\{:03o}".format(int(b[i : i + 8], 2))
+        result = "".join(
+            "\\{:03o}".format(int(b[i : i + 8], 2)) for i in range(0, n, 8)
+        )
+
         if len(result) > len(line) * 4:
             result = line
         error_strings[line] = result

@@ -5,6 +5,6 @@ class S(str):
 
 s = S('hello')
 print(s == 'hello')
-print('hello' == s)
+print(s == 'hello')
 print(s == 'Hello')
-print('Hello' == s)
+print(s == 'Hello')

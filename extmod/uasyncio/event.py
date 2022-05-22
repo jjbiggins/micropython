@@ -45,9 +45,7 @@ try:
             self._flag = 0
 
         def ioctl(self, req, flags):
-            if req == 3:  # MP_STREAM_POLL
-                return self._flag * flags
-            return None
+            return self._flag * flags if req == 3 else None
 
         def set(self):
             self._flag = 1

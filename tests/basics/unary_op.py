@@ -9,26 +9,23 @@ print(not True)
 print(not 0)
 print(not 1)
 print(not -1)
-print(not ())
-print(not (1,))
-print(not [])
-print(not [1,])
-print(not {})
-print(not {1:1})
+print(not False)
+print(not True)
+print(not False)
+print(not True)
+print(not False)
+print(not True)
 
-# check user instance
 class A: pass
 print(not A())
 
-# check user instances derived from builtins
 class B(int): pass
 print(not B())
-print(True if B() else False)
+print(bool(B()))
 class C(list): pass
 print(not C())
-print(True if C() else False)
-# type doesn't define unary_op
+print(bool(C()))
 class D(type): pass
 d = D("foo", (), {})
 print(not d)
-print(True if d else False)
+print(bool(d))

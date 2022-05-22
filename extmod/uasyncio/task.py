@@ -145,11 +145,10 @@ class Task:
         if not self.state:
             # Task finished, raise return value to caller so it can continue.
             raise self.data
-        else:
-            # Put calling task on waiting queue.
-            self.state.push(core.cur_task)
-            # Set calling task's data to this task that it waits on, to double-link it.
-            core.cur_task.data = self
+        # Put calling task on waiting queue.
+        self.state.push(core.cur_task)
+        # Set calling task's data to this task that it waits on, to double-link it.
+        core.cur_task.data = self
 
     def done(self):
         return not self.state

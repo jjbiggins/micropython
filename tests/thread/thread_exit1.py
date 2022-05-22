@@ -13,7 +13,7 @@ def thread_entry():
     _thread.exit()
 
 
-for i in range(2):
+for _ in range(2):
     while True:
         try:
             _thread.start_new_thread(thread_entry, ())

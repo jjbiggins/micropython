@@ -11,10 +11,7 @@ import uos as os
 
 tests = ["basics", "micropython", "float", "import", "io", " misc", "unicode", "extmod", "unix"]
 
-if sys.platform == "win32":
-    MICROPYTHON = "micropython.exe"
-else:
-    MICROPYTHON = "micropython"
+MICROPYTHON = "micropython.exe" if sys.platform == "win32" else "micropython"
 
 
 def should_skip(test):
@@ -33,9 +30,9 @@ for suite in tests:
     if sys.platform == "win32":
         # dir /b prints only contained filenames, one on a line
         # http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/dir.mspx
-        r = os.system("dir /b %s/*.py >tests.lst" % suite)
+        r = os.system(f"dir /b {suite}/*.py >tests.lst")
     else:
-        r = os.system("ls %s/*.py | xargs -n1 basename >tests.lst" % suite)
+        r = os.system(f"ls {suite}/*.py | xargs -n1 basename >tests.lst")
     assert r == 0
 
     with open("tests.lst") as f:
@@ -47,48 +44,46 @@ for suite in tests:
         if t == "native_check.py":
             continue
 
-        qtest = "%s/%s" % (suite, t)
+        qtest = f"{suite}/{t}"
 
         if should_skip(t):
-            print("skip " + qtest)
+            print(f"skip {qtest}")
             skip_count += 1
             continue
 
         exp = None
         try:
-            f = open(qtest + ".exp")
-            exp = f.read()
-            f.close()
+            with open(f"{qtest}.exp") as f:
+                exp = f.read()
         except OSError:
             pass
 
         if exp is not None:
             # print("run " + qtest)
-            r = os.system(MICROPYTHON + " %s >.tst.out" % qtest)
+            r = os.system(MICROPYTHON + f" {qtest} >.tst.out")
             if r == 0:
-                f = open(".tst.out")
-                out = f.read()
-                f.close()
+                with open(".tst.out") as f:
+                    out = f.read()
             else:
                 out = "CRASH"
 
             if out == "SKIP\n":
-                print("skip " + qtest)
+                print(f"skip {qtest}")
                 skip_count += 1
             else:
                 if out == exp:
-                    print("pass " + qtest)
+                    print(f"pass {qtest}")
                     passed_count += 1
                 else:
-                    print("FAIL " + qtest)
+                    print(f"FAIL {qtest}")
 
                 test_count += 1
         else:
             skip_count += 1
 
-print("%s tests performed" % test_count)
-print("%s tests passed" % passed_count)
+print(f"{test_count} tests performed")
+print(f"{passed_count} tests passed")
 if test_count != passed_count:
-    print("%s tests failed" % (test_count - passed_count))
+    print(f"{test_count - passed_count} tests failed")
 if skip_count:
-    print("%s tests skipped" % skip_count)
+    print(f"{skip_count} tests skipped")

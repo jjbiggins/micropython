@@ -32,10 +32,7 @@ waiting_events = {}
 
 
 def irq(event, data):
-    if event == _IRQ_CENTRAL_CONNECT:
-        conn_handle, addr_type, addr = data
-        waiting_events[event] = conn_handle
-    elif event == _IRQ_PERIPHERAL_CONNECT:
+    if event in [_IRQ_CENTRAL_CONNECT, _IRQ_PERIPHERAL_CONNECT]:
         conn_handle, addr_type, addr = data
         waiting_events[event] = conn_handle
     elif event == _IRQ_L2CAP_ACCEPT:
@@ -55,12 +52,12 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 def send_data(ble, conn_handle, cid):
     buf = bytearray(_PAYLOAD_LEN)
-    for i in range(_NUM_PAYLOADS):
+    for _ in range(_NUM_PAYLOADS):
         for j in range(_PAYLOAD_LEN):
             buf[j] = random.randint(0, 255)
         if not ble.l2cap_send(conn_handle, cid, buf):
@@ -135,10 +132,9 @@ def instance1():
         wait_for_event(_IRQ_L2CAP_DISCONNECT, TIMEOUT_MS)
 
         print(
-            "Received {}/{} bytes in {} ms. {} B/s".format(
-                recv_bytes, recv_correct, total_ticks, recv_bytes * 1000 // total_ticks
-            )
+            f"Received {recv_bytes}/{recv_correct} bytes in {total_ticks} ms. {recv_bytes * 1000 // total_ticks} B/s"
         )
+
 
         # Disconnect from peripheral.
         ble.gap_disconnect(conn_handle)

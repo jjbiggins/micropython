@@ -14,7 +14,7 @@ def foo():
 
 
 def thread_entry(n):
-    for i in range(n):
+    for _ in range(n):
         foo()
 
 

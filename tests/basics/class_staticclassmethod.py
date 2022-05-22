@@ -5,7 +5,7 @@ class C:
     def f(rhs):
         print('f', rhs)
     @classmethod
-    def g(self, rhs):
+    def g(cls, rhs):
         print('g', rhs)
 
     # builtin wrapped in staticmethod
@@ -14,7 +14,7 @@ class C:
         print('sub', rhs)
     # builtin wrapped in classmethod
     @classmethod
-    def __add__(self, rhs):
+    def __add__(cls, rhs):
         print('add', rhs)
 
     # subscript special methods wrapped in staticmethod

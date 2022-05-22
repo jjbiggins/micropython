@@ -387,7 +387,6 @@ def resume():
             log("Firmware update failed")
             return _read_failure_reason()
 
-        # Keep calling GET_STATE until error or FUS.
         elif state == _STATE_WAITING_FOR_FUS:
             log("Querying FUS state")
             status, result = fus_get_state()
@@ -401,7 +400,6 @@ def resume():
                 log("FUS active")
                 _write_state(_STATE_CHECK_UPDATES)
 
-        # Keep trying to start the WS until !fus_active() (or error).
         elif state == _STATE_WAITING_FOR_WS:
             if stm.rfcore_status() != _MAGIC_FUS_ACTIVE:
                 log("WS active")
@@ -416,7 +414,6 @@ def resume():
                     log("WS version: {}", stm.rfcore_fw_version(_FW_VERSION_WS))
                     _write_failure_state(REASON_NO_WS)
 
-        # Sequence the FUS 1.0.2 -> FUS 1.1.0 -> WS (depending on what's available).
         elif state == _STATE_CHECK_UPDATES:
             log("Checking for updates")
             fus_version = stm.rfcore_fw_version(_FW_VERSION_FUS)
@@ -427,7 +424,7 @@ def resume():
                     _PATH_FUS_102, _ADDR_FUS, _STATE_COPYING_FUS, _STATE_COPIED_FUS
                 ):
                     continue
-            elif fus_version >= _FUS_VERSION_102 and fus_version < _FUS_VERSION_110:
+            elif fus_version < _FUS_VERSION_110:
                 log("FUS 1.0.2 detected")
                 if _stat_and_start_copy(
                     _PATH_FUS_110, _ADDR_FUS, _STATE_COPYING_FUS, _STATE_COPIED_FUS
@@ -452,15 +449,10 @@ def resume():
             # this whole thing was a no-op and we should be fine to restart WS.
             _write_state(_STATE_WAITING_FOR_WS)
 
-        # This shouldn't happen - the flash write should always complete and
-        # move straight onto the COPIED state. Failure here indicates that
-        # the rfcore is misconfigured or the WS firmware was not deleted first.
-        elif state == _STATE_COPYING_FUS or state == _STATE_COPYING_WS:
+        elif state in [_STATE_COPYING_FUS, _STATE_COPYING_WS]:
             log("Flash copy failed mid-write")
             _write_failure_state(REASON_FLASH_COPY_FAILED)
 
-        # Flash write completed, we should immediately see GET_STATE return 0,0
-        # so we can start the FUS install.
         elif state == _STATE_COPIED_FUS:
             if fus_is_idle():
                 log("FUS copy complete, installing")
@@ -470,9 +462,6 @@ def resume():
                 log("FUS copy bad state")
                 _write_failure_state(REASON_FLASH_FUS_BAD_STATE)
 
-        # Keep polling the state until we see a 0,0 (success) or non-transient
-        # error. In general we should expect to see (16,0) several times,
-        # followed by a (255,0), followed by (0, 0).
         elif state == _STATE_INSTALLING_FUS:
             log("Installing FUS...")
             status, result = fus_get_state(_INSTALLING_FUS_GET_STATE_TIMEOUT)
@@ -496,9 +485,6 @@ def resume():
             else:
                 _write_failure_state(REASON_FUS_VENDOR + result)
 
-        # Keep polling the state until we see 0,0 or failure (1,0). Any other
-        # result means retry (but the docs say that 0 and 1 are the only
-        # status values).
         elif state == _STATE_DELETING_WS:
             log("Deleting WS...")
             status, result = fus_get_state()
@@ -514,7 +500,6 @@ def resume():
                 log("WS deletion failed")
                 _write_failure_state(REASON_WS_DELETION_FAILED)
 
-        # As for _STATE_COPIED_FUS above. We should immediately see 0,0.
         elif state == _STATE_COPIED_WS:
             if fus_is_idle():
                 log("WS copy complete, installing")
@@ -524,7 +509,6 @@ def resume():
                 log("WS copy bad state")
                 _write_failure_state(REASON_FLASH_WS_BAD_STATE)
 
-        # As for _STATE_INSTALLING_FUS above.
         elif state == _STATE_INSTALLING_WS:
             log("Installing WS...")
             status, result = fus_get_state(_INSTALLING_WS_GET_STATE_TIMEOUT)

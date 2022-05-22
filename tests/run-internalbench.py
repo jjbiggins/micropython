@@ -24,7 +24,7 @@ def run_tests(pyb, test_dict):
     testcase_count = 0
 
     for base_test, tests in sorted(test_dict.items()):
-        print(base_test + ":")
+        print(f"{base_test}:")
         for test_file in tests:
 
             # run MicroPython
@@ -55,7 +55,7 @@ def run_tests(pyb, test_dict):
                 baseline = t[1]
             print("    %.3fs (%+06.2f%%) %s" % (t[1], (t[1] * 100 / baseline) - 100, t[0]))
 
-    print("{} tests performed ({} individual testcases)".format(test_count, testcase_count))
+    print(f"{test_count} tests performed ({testcase_count} individual testcases)")
 
     # all tests succeeded
     return True
@@ -77,17 +77,13 @@ def main():
         pyb = None
 
     if len(args.files) == 0:
-        if pyb is None:
-            # run PC tests
-            test_dirs = ("internal_bench",)
-        else:
-            # run pyboard tests
-            test_dirs = ("basics", "float", "pyb")
+        test_dirs = ("internal_bench", ) if pyb is None else ("basics", "float", "pyb")
         tests = sorted(
             test_file
-            for test_files in (glob("{}/*.py".format(dir)) for dir in test_dirs)
+            for test_files in (glob(f"{dir}/*.py") for dir in test_dirs)
             for test_file in test_files
         )
+
     else:
         # tests explicitly given
         tests = sorted(args.files)
@@ -97,7 +93,7 @@ def main():
         m = re.match(r"(.+?)-(.+)\.py", t)
         if not m:
             continue
-        test_dict[m.group(1)].append([t, None])
+        test_dict[m[1]].append([t, None])
 
     if not run_tests(pyb, test_dict):
         sys.exit(1)

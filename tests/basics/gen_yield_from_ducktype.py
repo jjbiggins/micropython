@@ -31,9 +31,7 @@ class Incrementer:
         return self.send(None)
 
     def send(self, val):
-        if val is None:
-            return "Incrementer initialized"
-        return val + 1
+        return "Incrementer initialized" if val is None else val + 1
 
 def gen3():
     yield from Incrementer()

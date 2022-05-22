@@ -45,16 +45,15 @@ print(array.array('B', [0x61, 0x62, 0x63]) == b'abc')
 print(array.array('b', [0x61, 0x62, 0x63]) != b'abc')
 print(array.array('b', [0x61, 0x62, 0x63]) == b'xyz')
 print(array.array('b', [0x61, 0x62, 0x63]) != b'xyz')
-print(b'abc' == array.array('b', [0x61, 0x62, 0x63]))
-print(b'abc' == array.array('B', [0x61, 0x62, 0x63]))
-print(b'abc' != array.array('b', [0x61, 0x62, 0x63]))
-print(b'xyz' == array.array('b', [0x61, 0x62, 0x63]))
-print(b'xyz' != array.array('b', [0x61, 0x62, 0x63]))
+print(array.array('b', [0x61, 0x62, 0x63]) == b'abc')
+print(array.array('B', [0x61, 0x62, 0x63]) == b'abc')
+print(array.array('b', [0x61, 0x62, 0x63]) != b'abc')
+print(array.array('b', [0x61, 0x62, 0x63]) == b'xyz')
+print(array.array('b', [0x61, 0x62, 0x63]) != b'xyz')
 
 compatible_typecodes = []
 for t in ["b", "h", "i", "l", "q"]:
-  compatible_typecodes.append((t, t))
-  compatible_typecodes.append((t, t.upper()))
+    compatible_typecodes.extend(((t, t), (t, t.upper())))
 for a, b in compatible_typecodes:
   print(array.array(a, [1, 2]) == array.array(b, [1, 2]))
 

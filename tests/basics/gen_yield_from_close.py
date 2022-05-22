@@ -102,8 +102,7 @@ except RuntimeError:
 
 # case where close is propagated up to a built-in iterator
 def gen8():
-    g = range(2)
-    yield from g
+    yield from range(2)
 g = gen8()
 print(next(g))
 g.close()

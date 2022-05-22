@@ -75,7 +75,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 def send_data(ble, conn_handle, cid):

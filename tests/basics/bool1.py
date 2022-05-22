@@ -11,14 +11,14 @@ print(+True)
 print(-True)
 
 # comparison with itself
-print(False == False)
-print(False == True)
-print(True == False)
-print(True == True)
-print(False != False)
-print(False != True)
-print(True != False)
-print(True != True)
+print(not False)
+print(False)
+print(not True)
+print(True)
+print(False)
+print(not False)
+print(True)
+print(not True)
 
 # comparison with integers
 print(False == 0)

@@ -233,10 +233,7 @@ def main():
     # run actual C compiler
     # need to quote args that have special characters in them
     def quote(s):
-        if s.find('<') != -1 or s.find('>') != -1:
-            return "'" + s + "'"
-        else:
-            return s
+        return "'" + s + "'" if s.find('<') != -1 or s.find('>') != -1 else s
     ret = os.system(cc1_path + ' ' + ' '.join(quote(s) for s in sys.argv[1:]))
     if ret != 0:
         ret = (ret & 0x7f) or 127 # make it in range 0-127, but non-zero

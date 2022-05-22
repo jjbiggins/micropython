@@ -35,14 +35,13 @@ class LCD160CR:
         if connect in ("X", "Y", "XY", "YX"):
             i = connect[-1]
             j = connect[0]
-            y = j + "4"
+            y = f"{j}4"
         elif connect == "C":
             i = 2
             j = 2
             y = "A7"
-        else:
-            if pwr is None or i2c is None or spi is None:
-                raise ValueError('must specify valid "connect" or all of "pwr", "i2c" and "spi"')
+        elif pwr is None or i2c is None or spi is None:
+            raise ValueError('must specify valid "connect" or all of "pwr", "i2c" and "spi"')
 
         if pwr is None:
             pwr = machine.Pin(y, machine.Pin.OUT)
@@ -69,7 +68,7 @@ class LCD160CR:
         self.buf19 = bytearray(19)
         self.buf = [None] * 10
         for i in range(1, 10):
-            self.buf[i] = memoryview(self.buf16)[0:i]
+            self.buf[i] = memoryview(self.buf16)[:i]
         self.buf1 = self.buf[1]
         self.array4 = [0, 0, 0, 0]
 
@@ -186,18 +185,15 @@ class LCD160CR:
                             c[1], c[3] = c[3], c[1]
                         c[2] += ((h - 1 - c[3]) * (c[2] - c[0])) // (c[3] - c[1])
                         c[3] = h - 1
+                elif c[0] == c[2]:
+                    c[1] = max(c[1], 0)
+                    c[3] = max(c[3], 0)
                 else:
-                    if c[0] == c[2]:
-                        if c[1] < 0:
-                            c[1] = 0
-                        if c[3] < 0:
-                            c[3] = 0
-                    else:
-                        if c[3] < c[1]:
-                            c[0], c[2] = c[2], c[0]
-                            c[1], c[3] = c[3], c[1]
-                        c[0] += ((-c[1]) * (c[2] - c[0])) // (c[3] - c[1])
-                        c[1] = 0
+                    if c[3] < c[1]:
+                        c[0], c[2] = c[2], c[0]
+                        c[1], c[3] = c[3], c[1]
+                    c[0] += ((-c[1]) * (c[2] - c[0])) // (c[3] - c[1])
+                    c[1] = 0
             else:
                 return True
 
@@ -352,10 +348,10 @@ class LCD160CR:
                 top = False
                 h += y
                 y = 0
-            if cmd == 0x51 or cmd == 0x72:
+            if cmd in [0x51, 0x72]:
                 # draw interior
                 self._fcmd2b("<BBBBBB", 0x51, x, y, min(w, 255), min(h, 255))
-            if cmd == 0x57 or cmd == 0x72:
+            if cmd in [0x57, 0x72]:
                 # draw outline
                 if left:
                     self._fcmd2b("<BBBBBB", 0x57, x, y, 1, min(h, 255))

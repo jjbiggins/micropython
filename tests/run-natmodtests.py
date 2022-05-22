@@ -103,7 +103,7 @@ def run_tests(target_truth, target, args, stats):
                 test_mpy = v.replace("$(ARCH)", args.arch)
                 break
         else:
-            print("----  {} - no matching mpy".format(test_file))
+            print(f"----  {test_file} - no matching mpy")
             continue
 
         # Read test script
@@ -115,7 +115,7 @@ def run_tests(target_truth, target, args, stats):
             with open(NATMOD_EXAMPLE_DIR + test_mpy, "rb") as f:
                 test_script = b"__buf=" + bytes(repr(f.read()), "ascii") + b"\n"
         except OSError:
-            print("----  {} - mpy file not compiled".format(test_file))
+            print(f"----  {test_file} - mpy file not compiled")
             continue
         test_script += bytes(injected_import_hook_code.format(test_module), "ascii")
         test_script += test_file_data
@@ -129,11 +129,11 @@ def run_tests(target_truth, target, args, stats):
             result = "SKIP"
         elif error is not None:
             result = "FAIL"
-            extra = " - " + str(error)
+            extra = f" - {str(error)}"
         else:
             # Check result against truth
             try:
-                with open(test_file + ".exp", "rb") as f:
+                with open(f"{test_file}.exp", "rb") as f:
                     result_exp = f.read()
                 error = None
             except OSError:
@@ -148,10 +148,10 @@ def run_tests(target_truth, target, args, stats):
 
         # Accumulate statistics
         stats["total"] += 1
-        if result == "pass":
-            stats["pass"] += 1
-        elif result == "SKIP":
+        if result == "SKIP":
             stats["skip"] += 1
+        elif result == "pass":
+            stats["pass"] += 1
         else:
             stats["fail"] += 1
 
@@ -188,12 +188,12 @@ def main():
     target.close()
     target_truth.close()
 
-    print("{} tests performed".format(stats["total"]))
-    print("{} tests passed".format(stats["pass"]))
+    print(f'{stats["total"]} tests performed')
+    print(f'{stats["pass"]} tests passed')
     if stats["fail"]:
-        print("{} tests failed".format(stats["fail"]))
+        print(f'{stats["fail"]} tests failed')
     if stats["skip"]:
-        print("{} tests skipped".format(stats["skip"]))
+        print(f'{stats["skip"]} tests skipped')
 
     if stats["fail"]:
         sys.exit(1)

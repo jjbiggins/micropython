@@ -48,7 +48,7 @@ def main(src_path, dest_path):
         src_file = os.path.join(src_path, src_file)
         dest_file = os.path.join(dest_path, dest_file)
         if not os.path.exists(src_file):
-            print("Unable to find: {}".format(src_file))
+            print(f"Unable to find: {src_file}")
             continue
         sz = 0
         with open(src_file, "rb") as src:
@@ -61,12 +61,12 @@ def main(src_path, dest_path):
                     v ^= _OBFUSCATION_KEY
                     dest.write(struct.pack("<I", v))
                     sz += 4
-        print("Written {} ({} bytes)".format(dest_file, sz))
+        print(f"Written {dest_file} ({sz} bytes)")
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: {} src_path dest_path".format(sys.argv[0]))
+        print(f"Usage: {sys.argv[0]} src_path dest_path")
         print()
         print(
             '"src_path" should be the location of the ST binaries from https://github.com/STMicroelectronics/STM32CubeWB/tree/master/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x'

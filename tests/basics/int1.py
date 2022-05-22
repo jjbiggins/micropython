@@ -1,10 +1,10 @@
 print(int(False))
 print(int(True))
 
-print(int(0))
-print(int(1))
+print(0)
+print(1)
 print(int(+1))
-print(int(-1))
+print(-1)
 
 print(int('0'))
 print(int('+0'))
@@ -64,7 +64,7 @@ def test(value, base):
 test('x', 0)
 test('1x', 0)
 test('  1x', 0)
-test('  1' + chr(2) + '  ', 0)
+test(f'  1{chr(2)}  ', 0)
 test('', 0)
 test(' ', 0)
 test('  \t\t  ', 0)

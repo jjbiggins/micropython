@@ -72,7 +72,7 @@ class SDCard:
         self.init_spi(100000)
 
         # clock card at least 100 cycles with cs high
-        for i in range(16):
+        for _ in range(16):
             self.spi.write(b"\xff")
 
         # CMD0: init card; should return _R1_IDLE_STATE (allow 5 attempts)
@@ -115,7 +115,7 @@ class SDCard:
         self.init_spi(baudrate)
 
     def init_card_v1(self):
-        for i in range(_CMD_TIMEOUT):
+        for _ in range(_CMD_TIMEOUT):
             self.cmd(55, 0, 0)
             if self.cmd(41, 0, 0) == 0:
                 self.cdv = 512
@@ -124,7 +124,7 @@ class SDCard:
         raise OSError("timeout waiting for v1 card")
 
     def init_card_v2(self):
-        for i in range(_CMD_TIMEOUT):
+        for _ in range(_CMD_TIMEOUT):
             time.sleep_ms(50)
             self.cmd(58, 0, 0, 4)
             self.cmd(55, 0, 0)
@@ -152,12 +152,12 @@ class SDCard:
             self.spi.readinto(self.tokenbuf, 0xFF)
 
         # wait for the response (response[7] == 0)
-        for i in range(_CMD_TIMEOUT):
+        for _ in range(_CMD_TIMEOUT):
             self.spi.readinto(self.tokenbuf, 0xFF)
             response = self.tokenbuf[0]
             if not (response & 0x80):
                 # this could be a big-endian integer that we are getting here
-                for j in range(final):
+                for _ in range(final):
                     self.spi.write(b"\xff")
                 if release:
                     self.cs(1)

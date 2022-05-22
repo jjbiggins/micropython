@@ -34,11 +34,8 @@ print(type(uos.listdir("/")))
 # mkdir
 uos.mkdir(temp_dir)
 
-# file create
-f = open(temp_dir + "/test", "w")
-f.write("hello")
-f.close()
-
+with open(f"{temp_dir}/test", "w") as f:
+    f.write("hello")
 # close on a closed file should succeed
 f.close()
 
@@ -46,18 +43,15 @@ f.close()
 f = type(f)(2)
 print(f)
 
-# file read
-f = open(temp_dir + "/test", "r")
-print(f.read())
-f.close()
-
+with open(f"{temp_dir}/test", "r") as f:
+    print(f.read())
 # rename
-uos.rename(temp_dir + "/test", temp_dir + "/test2")
+uos.rename(f"{temp_dir}/test", f"{temp_dir}/test2")
 print(uos.listdir(temp_dir))
 
 # construct new VfsPosix with path argument
 vfs = uos.VfsPosix(temp_dir)
-print(list(i[0] for i in vfs.ilistdir(".")))
+print([i[0] for i in vfs.ilistdir(".")])
 
 # stat, statvfs (statvfs may not exist)
 print(type(vfs.stat(".")))
@@ -69,12 +63,12 @@ print(type(list(vfs.ilistdir("."))[0][0]))
 print(type(list(vfs.ilistdir(b"."))[0][0]))
 
 # remove
-uos.remove(temp_dir + "/test2")
+uos.remove(f"{temp_dir}/test2")
 print(uos.listdir(temp_dir))
 
 # remove with error
 try:
-    uos.remove(temp_dir + "/test2")
+    uos.remove(f"{temp_dir}/test2")
 except OSError:
     print("remove OSError")
 

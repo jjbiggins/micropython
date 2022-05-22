@@ -13,7 +13,7 @@ def set(dest, i: int, val: int):
     dest[i] = val + 1
 
 
-ar = [i for i in range(3)]
+ar = list(range(3))
 
 for i in range(len(ar)):
     set(ar, i - 1, i)

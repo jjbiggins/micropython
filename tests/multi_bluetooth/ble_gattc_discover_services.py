@@ -41,7 +41,7 @@ def irq(event, data):
     elif event == _IRQ_PERIPHERAL_DISCONNECT:
         print("_IRQ_PERIPHERAL_DISCONNECT")
     elif event == _IRQ_GATTC_SERVICE_RESULT:
-        if data[3] == UUID_A or data[3] == UUID_B:
+        if data[3] in [UUID_A, UUID_B]:
             print("_IRQ_GATTC_SERVICE_RESULT", data[3])
             num_service_result += 1
     elif event == _IRQ_GATTC_SERVICE_DONE:
@@ -57,7 +57,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.

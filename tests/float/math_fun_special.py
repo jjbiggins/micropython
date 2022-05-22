@@ -49,4 +49,4 @@ for function_name, function, test_vals in functions:
         try:
             print("{:.4g}".format(function(value)))
         except ValueError as e:
-            print(str(e))
+            print(e)

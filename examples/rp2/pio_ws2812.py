@@ -52,7 +52,7 @@ for i in range(4 * NUM_LEDS):
     time.sleep_ms(50)
 
 # Fade out.
-for i in range(24):
+for _ in range(24):
     for j in range(NUM_LEDS):
         ar[j] = ar[j] >> 1 & 0x7F7F7F
     sm.put(ar, 8)

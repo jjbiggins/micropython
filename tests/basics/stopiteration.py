@@ -31,7 +31,6 @@ class B:
 
 def gen(x):
     return x
-    yield
 
 
 def gen2(x):

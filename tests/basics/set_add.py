@@ -2,22 +2,14 @@ s = {1, 2, 3, 4}
 print(s.add(5))
 print(sorted(s))
 
-s = set()
-s.add(0)
-s.add(False)
+s = {0, False}
 print(s)
 
-s = set()
-s.add(False)
-s.add(0)
+s = {False, 0}
 print(s)
 
-s = set()
-s.add(1)
-s.add(True)
+s = {1, True}
 print(s)
 
-s = set()
-s.add(True)
-s.add(1)
+s = {True, 1}
 print(s)

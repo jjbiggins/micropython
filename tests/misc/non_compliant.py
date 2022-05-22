@@ -83,7 +83,7 @@ except NotImplementedError:
 
 # bytes subscr with step!=1 not implemented
 try:
-    b"123"[0:3:2]
+    b"123"[:3:2]
 except NotImplementedError:
     print("NotImplementedError")
 

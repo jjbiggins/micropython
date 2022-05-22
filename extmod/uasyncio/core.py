@@ -241,8 +241,8 @@ _stop_task = None
 class Loop:
     _exc_handler = None
 
-    def create_task(coro):
-        return create_task(coro)
+    def create_task(self):
+        return create_task(self)
 
     def run_forever():
         global _stop_task
@@ -250,8 +250,8 @@ class Loop:
         run_until_complete(_stop_task)
         # TODO should keep running until .stop() is called, even if there're no tasks left
 
-    def run_until_complete(aw):
-        return run_until_complete(_promote_to_task(aw))
+    def run_until_complete(self):
+        return run_until_complete(_promote_to_task(self))
 
     def stop():
         global _stop_task
@@ -263,19 +263,19 @@ class Loop:
     def close():
         pass
 
-    def set_exception_handler(handler):
-        Loop._exc_handler = handler
+    def set_exception_handler(self):
+        Loop._exc_handler = self
 
     def get_exception_handler():
         return Loop._exc_handler
 
-    def default_exception_handler(loop, context):
+    def default_exception_handler(self, context):
         print(context["message"])
         print("future:", context["future"], "coro=", context["future"].coro)
         sys.print_exception(context["exception"])
 
-    def call_exception_handler(context):
-        (Loop._exc_handler or Loop.default_exception_handler)(Loop, context)
+    def call_exception_handler(self):
+        ((Loop._exc_handler or Loop.default_exception_handler))(Loop, self)
 
 
 # The runq_len and waitq_len arguments are for legacy uasyncio compatibility

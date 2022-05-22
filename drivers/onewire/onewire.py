@@ -52,7 +52,7 @@ class OneWire:
         devices = []
         diff = 65
         rom = False
-        for i in range(0xFF):
+        for _ in range(0xFF):
             rom, diff = self._search_rom(rom, diff)
             if rom:
                 devices += [rom]
@@ -76,11 +76,11 @@ class OneWire:
                 if self.readbit():
                     if b:  # there are no devices or there is an error on the bus
                         return None, 0
-                else:
-                    if not b:  # collision, two devices with different bit meaning
-                        if diff > i or ((l_rom[byte] & (1 << bit)) and diff != i):
-                            b = 1
-                            next_diff = i
+                elif not b and (
+                    diff > i or ((l_rom[byte] & (1 << bit)) and diff != i)
+                ):
+                    b = 1
+                    next_diff = i
                 self.writebit(b)
                 if b:
                     r_b |= 1 << bit

@@ -48,7 +48,7 @@ def test():
 
     # check results
     for func_name, min_len in EXPECTED_MAP:
-        print("Testing %s" % func_name)
+        print(f"Testing {func_name}")
         results = results_map.get(func_name)
         if results is None:
             pass
@@ -57,8 +57,7 @@ def test():
             pass
         elif len(results) < min_len:
             print(
-                "%s() returns %s result%s in %s ms, expecting >= %s"
-                % (func_name, len(results), "s"[: len(results) != 1], TEST_TIME, min_len)
+                f'{func_name}() returns {len(results)} result{"s"[: len(results) != 1]} in {TEST_TIME} ms, expecting >= {min_len}'
             )
 
 

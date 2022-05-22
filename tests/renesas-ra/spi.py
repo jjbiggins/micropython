@@ -7,7 +7,6 @@ if (
     or "RA4M1_CLICKER" in machine
     or "RA4M1_EK" in machine
     or "RA4W1_EK" in machine
-    or "RA6M1_EK" in machine
 ):
     spis = (-1, 0)
 else:

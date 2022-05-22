@@ -32,25 +32,18 @@ def main(micropython_optimize=False):
         print("Client address:", client_addr)
         print("Client socket:", client_sock)
 
-        if not micropython_optimize:
-            # To read line-oriented protocol (like HTTP) from a socket (and
-            # avoid short read problem), it must be wrapped in a stream (aka
-            # file-like) object. That's how you do it in CPython:
-            client_stream = client_sock.makefile("rwb")
-        else:
-            # .. but MicroPython socket objects support stream interface
-            # directly, so calling .makefile() method is not required. If
-            # you develop application which will run only on MicroPython,
-            # especially on a resource-constrained embedded device, you
-            # may take this shortcut to save resources.
-            client_stream = client_sock
+        client_stream = (
+            client_sock
+            if micropython_optimize
+            else client_sock.makefile("rwb")
+        )
 
         print("Request:")
         req = client_stream.readline()
         print(req)
         while True:
             h = client_stream.readline()
-            if h == b"" or h == b"\r\n":
+            if h in [b"", b"\r\n"]:
                 break
             print(h)
         client_stream.write(CONTENT % counter)

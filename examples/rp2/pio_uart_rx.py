@@ -96,10 +96,10 @@ for pio_prog in ("uart_rx_mini", "uart_rx"):
     sm.active(1)
 
     # Tell core 1 to print some text to UART 1
-    text = "Hello, world from PIO, using {}!".format(pio_prog)
+    text = f"Hello, world from PIO, using {pio_prog}!"
     _thread.start_new_thread(core1_task, (uart, text))
 
     # Echo characters received from PIO to the console.
-    for i in range(len(text)):
+    for _ in range(len(text)):
         print(chr(sm.get() >> 24), end="")
     print()

@@ -112,10 +112,10 @@ def prepare_script_for_target(args, *, script_filename=None, script_text=None, f
                 script_text = f.read()
     elif args.via_mpy:
         tempname = tempfile.mktemp(dir="")
-        mpy_filename = tempname + ".mpy"
+        mpy_filename = f"{tempname}.mpy"
 
         if script_filename is None:
-            script_filename = tempname + ".py"
+            script_filename = f"{tempname}.py"
             cleanup_script_filename = True
             with open(script_filename, "wb") as f:
                 f.write(script_text)
@@ -123,10 +123,19 @@ def prepare_script_for_target(args, *, script_filename=None, script_text=None, f
             cleanup_script_filename = False
 
         subprocess.check_output(
-            [MPYCROSS]
-            + args.mpy_cross_flags.split()
-            + ["-o", mpy_filename, "-X", "emit=" + args.emit, script_filename]
+            (
+                [MPYCROSS]
+                + args.mpy_cross_flags.split()
+                + [
+                    "-o",
+                    mpy_filename,
+                    "-X",
+                    f"emit={args.emit}",
+                    script_filename,
+                ]
+            )
         )
+
 
         with open(mpy_filename, "rb") as f:
             script_text = b"__buf=" + bytes(repr(f.read()), "ascii") + b"\n"
@@ -137,7 +146,7 @@ def prepare_script_for_target(args, *, script_filename=None, script_text=None, f
 
         script_text += bytes(injected_import_hook_code, "ascii")
     else:
-        print("error: using emit={} must go via .mpy".format(args.emit))
+        print(f"error: using emit={args.emit} must go via .mpy")
         sys.exit(1)
 
     return script_text
@@ -206,9 +215,8 @@ def run_micropython(pyb, args, test_file, is_special=False):
                             ready = select.select([master], [], [], 0.02)
                             if ready[0] == [master]:
                                 rv += os.read(master, 1024)
-                            else:
-                                if not required or rv:
-                                    return rv
+                            elif not required or rv:
+                                return rv
 
                     def send_get(what):
                         os.write(master, what)
@@ -673,7 +681,7 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
             return
 
         # get expected output
-        test_file_expected = test_file + ".exp"
+        test_file_expected = f"{test_file}.exp"
         if os.path.isfile(test_file_expected):
             # expected output given by a file, so read that in
             with open(test_file_expected, "rb") as f:
@@ -704,8 +712,8 @@ def run_tests(pyb, tests, args, result_dir, num_threads=1):
 
         testcase_count.add(len(output_expected.splitlines()))
 
-        filename_expected = os.path.join(result_dir, test_basename + ".exp")
-        filename_mupy = os.path.join(result_dir, test_basename + ".out")
+        filename_expected = os.path.join(result_dir, f"{test_basename}.exp")
+        filename_mupy = os.path.join(result_dir, f"{test_basename}.out")
 
         if output_expected == output_mupy:
             print("pass ", test_file)
@@ -761,10 +769,7 @@ class append_filter(argparse.Action):
     def __call__(self, parser, args, value, option):
         if not hasattr(args, self.dest):
             args.filters = []
-        if option.startswith(("-e", "--e")):
-            option = "exclude"
-        else:
-            option = "include"
+        option = "exclude" if option.startswith(("-e", "--e")) else "include"
         args.filters.append((option, re.compile(value)))
 
 
@@ -895,17 +900,20 @@ the last matching regex is used:
         import pyboard
 
         if not args.mpy_cross_flags:
-            if args.target == "esp8266":
-                args.mpy_cross_flags = "-march=xtensa"
-            elif args.target == "esp32":
+            if args.target == "esp32":
                 args.mpy_cross_flags = "-march=xtensawin"
+            elif args.target == "esp8266":
+                args.mpy_cross_flags = "-march=xtensa"
             else:
                 args.mpy_cross_flags = "-march=armv7m"
 
         pyb = pyboard.Pyboard(args.device, args.baudrate, args.user, args.password)
         pyb.enter_raw_repl()
     else:
-        raise ValueError("target must be one of %s" % ", ".join(LOCAL_TARGETS + EXTERNAL_TARGETS))
+        raise ValueError(
+            f'target must be one of {", ".join(LOCAL_TARGETS + EXTERNAL_TARGETS)}'
+        )
+
 
     if len(args.files) == 0:
         if args.test_dirs is None:
@@ -951,16 +959,17 @@ the last matching regex is used:
             test_dirs = args.test_dirs
         tests = sorted(
             test_file
-            for test_files in (glob("{}/*.py".format(dir)) for dir in test_dirs)
+            for test_files in (glob(f"{dir}/*.py") for dir in test_dirs)
             for test_file in test_files
         )
+
     else:
         # tests explicitly given
         tests = args.files
 
     if not args.keep_path:
         # clear search path to make sure tests use only builtin modules and those in extmod
-        os.environ["MICROPYPATH"] = ".frozen" + os.pathsep + base_path("../extmod")
+        os.environ["MICROPYPATH"] = f".frozen{os.pathsep}" + base_path("../extmod")
 
     try:
         os.makedirs(args.result_dir, exist_ok=True)

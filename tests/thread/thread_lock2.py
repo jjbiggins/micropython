@@ -18,7 +18,7 @@ def thread_entry():
 
 
 # spawn the threads
-for i in range(4):
+for _ in range(4):
     _thread.start_new_thread(thread_entry, ())
 
 # wait for threads to finish

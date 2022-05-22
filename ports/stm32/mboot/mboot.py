@@ -44,14 +44,10 @@ class Bootloader:
                 raise Exception("timeout")
         if n >= 129:
             raise Exception(n)
-        if n == 0:
-            return b""
-        else:
-            return self.i2c.readfrom(self.addr, n)
+        return b"" if n == 0 else self.i2c.readfrom(self.addr, n)
 
     def wait_empty_response(self):
-        ret = self.wait_response()
-        if ret:
+        if ret := self.wait_response():
             raise Exception("expected empty response got %r" % ret)
         else:
             return None
@@ -83,7 +79,7 @@ class Bootloader:
             n = int(n)
             assert sz.endswith(b"Kg")
             sz = int(sz[:-2]) * 1024
-            for i in range(n):
+            for _ in range(n):
                 pages.append((flash_addr, sz))
                 flash_addr += sz
         return pages

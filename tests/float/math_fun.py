@@ -43,7 +43,7 @@ for function_name, function, test_vals in functions:
         try:
             print("{:.5g}".format(function(value)))
         except ValueError as e:
-            print(str(e))
+            print(e)
 
 tuple_functions = [
     ("frexp", frexp, test_values),

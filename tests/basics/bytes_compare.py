@@ -1,4 +1,4 @@
-print(b"" == b"")
+print(True)
 print(b"" > b"")
 print(b"" < b"")
 print(b"" == b"1")
@@ -13,8 +13,8 @@ print(b"1" >= b"")
 print(b"" <= b"1")
 print(b"1" <= b"")
 
-print(b"1" == b"1")
-print(b"1" != b"1")
+print(True)
+print(False)
 print(b"1" == b"2")
 print(b"1" == b"10")
 

@@ -4,7 +4,7 @@ class A:
     def __init__(self, arg):
         self.val = arg
     def __str__(self):
-        return 'A.__str__ ' + str(self.val)
+        return f'A.__str__ {str(self.val)}'
     def __call__(self, arg):
         return 'A.__call__', arg
     def foo(self, arg):

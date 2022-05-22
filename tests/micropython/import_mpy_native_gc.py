@@ -80,7 +80,7 @@ del sys.modules["features0"]
 gc.collect()
 
 # Allocate lots of fragmented memory to overwrite anything that was just freed by the GC.
-for i in range(1000):
+for _ in range(1000):
     []
 
 # Run the native function, it should not have been freed or overwritten.

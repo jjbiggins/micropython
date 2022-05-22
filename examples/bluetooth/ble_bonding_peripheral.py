@@ -112,11 +112,10 @@ class BLETemperature:
             value = bytes(value) if value else None
             print("set secret:", key, value)
             if value is None:
-                if key in self._secrets:
-                    del self._secrets[key]
-                    return True
-                else:
+                if key not in self._secrets:
                     return False
+                del self._secrets[key]
+                return True
             else:
                 self._secrets[key] = value
             return True

@@ -27,7 +27,7 @@ def parse_port_pin(name_str):
         raise ValueError("Expecting pin name to start with GP")
     if not name_str[2:].isdigit():
         raise ValueError("Expecting numeric GPIO number")
-    port = int(int(name_str[2:]) / 8)
+    port = int(name_str[2:]) // 8
     gpio_bit = 1 << int(int(name_str[2:]) % 8)
     return (port, gpio_bit)
 
@@ -67,9 +67,9 @@ class Pin:
         self.afs.append(af)
 
     def print(self):
-        print("// {}".format(self.name))
+        print(f"// {self.name}")
         if len(self.afs):
-            print("const pin_af_t pin_{}_af[] = {{".format(self.name))
+            print(f"const pin_af_t pin_{self.name}_af[] = {{")
             for af in self.afs:
                 af.print()
             print("};")
@@ -130,8 +130,7 @@ class Pins:
                 pin_num = int(row[pin_col]) - 1
                 pin = Pin(row[pinname_col], port_num, gpio_bit, pin_num)
                 self.board_pins.append(pin)
-                af_idx = 0
-                for af in row[af_start_col:]:
+                for af_idx, af in enumerate(row[af_start_col:]):
                     af_splitted = af.split("_")
                     fn_name = af_splitted[0].rstrip("0123456789")
                     if fn_name in SUPPORTED_AFS:
@@ -139,7 +138,6 @@ class Pins:
                         if type_name in SUPPORTED_AFS[fn_name]:
                             unit_idx = af_splitted[0][-1]
                             pin.add_af(AF(af, af_idx, fn_name, int(unit_idx), type_name))
-                    af_idx += 1
 
     def parse_board_file(self, filename, cpu_pin_col):
         with open(filename, "r") as csvfile:
@@ -191,15 +189,15 @@ class Pins:
             af_qstr_set = set([])
             for pin in self.board_pins:
                 if pin.board_pin:
-                    pin_qstr_set |= set([pin.name])
+                    pin_qstr_set |= {pin.name}
                     for af in pin.afs:
-                        af_qstr_set |= set([af.name])
+                        af_qstr_set |= {af.name}
             print("// Board pins", file=qstr_file)
             for qstr in sorted(pin_qstr_set):
-                print("Q({})".format(qstr), file=qstr_file)
+                print(f"Q({qstr})", file=qstr_file)
             print("\n// Pin AFs", file=qstr_file)
             for qstr in sorted(af_qstr_set):
-                print("Q({})".format(qstr), file=qstr_file)
+                print(f"Q({qstr})", file=qstr_file)
 
 
 def main():

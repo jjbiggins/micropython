@@ -64,27 +64,23 @@ def run_script_on_target(target, script):
 
 
 def run_feature_test(target, test):
-    with open("feature_check/" + test + ".py", "rb") as f:
+    with open(f"feature_check/{test}.py", "rb") as f:
         script = f.read()
     output, err = run_script_on_target(target, script)
-    if err is None:
-        return output
-    else:
-        return "CRASH: %r" % err
+    return output if err is None else "CRASH: %r" % err
 
 
 def run_benchmark_on_target(target, script):
     output, err = run_script_on_target(target, script)
-    if err is None:
-        if output == "SKIP":
-            return -1, -1, "SKIP"
-        time, norm, result = output.split(None, 2)
-        try:
-            return int(time), int(norm), result
-        except ValueError:
-            return -1, -1, "CRASH: %r" % output
-    else:
+    if err is not None:
         return -1, -1, "CRASH: %r" % err
+    if output == "SKIP":
+        return -1, -1, "SKIP"
+    time, norm, result = output.split(None, 2)
+    try:
+        return int(time), int(norm), result
+    except ValueError:
+        return -1, -1, "CRASH: %r" % output
 
 
 def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
@@ -93,7 +89,7 @@ def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
     target_had_error = False
 
     for test_file in sorted(test_list):
-        print(test_file + ": ", end="")
+        print(f"{test_file}: ", end="")
 
         # Check if test should be skipped
         skip = (
@@ -109,14 +105,9 @@ def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
         # Create test script
         with open(test_file, "rb") as f:
             test_script = f.read()
-        with open(BENCH_SCRIPT_DIR + "benchrun.py", "rb") as f:
+        with open(f"{BENCH_SCRIPT_DIR}benchrun.py", "rb") as f:
             test_script += f.read()
         test_script += b"bm_run(%u, %u)\n" % (param_n, param_m)
-
-        # Write full test script if needed
-        if 0:
-            with open("%s.full" % test_file, "wb") as f:
-                f.write(test_script)
 
         # Process script through mpy-cross if needed
         if isinstance(target, pyboard.Pyboard) or args.via_mpy:
@@ -144,7 +135,7 @@ def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
 
         # Check result against truth if needed
         if error is None and result_out != "None":
-            test_file_expected = test_file + ".exp"
+            test_file_expected = f"{test_file}.exp"
             if os.path.isfile(test_file_expected):
                 # Expected result is given by a file, so read that in
                 with open(test_file_expected) as f:
@@ -167,10 +158,6 @@ def run_benchmarks(args, target, param_n, param_m, n_average, test_list):
                     t_avg, 100 * t_sd / t_avg, s_avg, 100 * s_sd / s_avg
                 )
             )
-            if 0:
-                print("  times: ", times)
-                print("  scores:", scores)
-
         sys.stdout.flush()
 
     return target_had_error
@@ -202,9 +189,9 @@ def compute_diff(file1, file2, diff_score):
     else:
         print("diff of microsecond times (lower is better)")
     if n1 == n2 and m1 == m2:
-        hdr = "N={} M={}".format(n1, m1)
+        hdr = f"N={n1} M={m1}"
     else:
-        hdr = "N={} M={} vs N={} M={}".format(n1, m1, n2, m2)
+        hdr = f"N={n1} M={m1} vs N={n2} M={m2}"
     print(
         "{:26} {:>10} -> {:>10}   {:>10}   {:>7}% (error%)".format(
             hdr, file1, file2, "diff", "diff"
@@ -279,7 +266,7 @@ def main():
         target = pyboard.Pyboard(args.device)
         target.enter_raw_repl()
     else:
-        target = [MICROPYTHON, "-X", "emit=" + args.emit]
+        target = [MICROPYTHON, "-X", f"emit={args.emit}"]
 
     if len(args.files) == 0:
         tests_skip = ("benchrun.py",)
@@ -294,7 +281,7 @@ def main():
     else:
         tests = sorted(args.files)
 
-    print("N={} M={} n_average={}".format(N, M, n_average))
+    print(f"N={N} M={M} n_average={n_average}")
 
     target_had_error = run_benchmarks(args, target, N, M, n_average, tests)
 

@@ -23,16 +23,13 @@ from telnetlib import Telnet
 
 
 def print_exception(e):
-    print("Exception: {}, on line {}".format(e, sys.exc_info()[-1].tb_lineno))
+    print(f"Exception: {e}, on line {sys.exc_info()[-1].tb_lineno}")
 
 
 def ftp_directory_exists(ftpobj, directory_name):
     filelist = []
     ftpobj.retrlines("LIST", filelist.append)
-    for f in filelist:
-        if f.split()[-1] == directory_name:
-            return True
-    return False
+    return any(f.split()[-1] == directory_name for f in filelist)
 
 
 def transfer_file(args):
@@ -45,7 +42,7 @@ def transfer_file(args):
             if "250" in ftp.cwd("/flash"):
                 if not ftp_directory_exists(ftp, "sys"):
                     print("/flash/sys directory does not exist")
-                    if not "550" in ftp.mkd("sys"):
+                    if "550" not in ftp.mkd("sys"):
                         print("/flash/sys directory created")
                     else:
                         print("Error: cannot create /flash/sys directory")
@@ -191,17 +188,16 @@ def main():
     try:
         if args.file is None:
             raise ValueError("the image file path must be specified")
-        if transfer_file(args):
-            if reset_board(args):
-                if args.verify:
-                    print("Waiting for the WiFi connection to come up again...")
-                    # this time is to allow the system's wireless network card to
-                    # connect to the WiPy again.
-                    time.sleep(5)
-                    if verify_update(args):
-                        result = 0
-                else:
+        if transfer_file(args) and reset_board(args):
+            if args.verify:
+                print("Waiting for the WiFi connection to come up again...")
+                # this time is to allow the system's wireless network card to
+                # connect to the WiPy again.
+                time.sleep(5)
+                if verify_update(args):
                     result = 0
+            else:
+                result = 0
 
     except Exception as e:
         print_exception(e)

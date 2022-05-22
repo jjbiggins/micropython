@@ -38,7 +38,7 @@ a.meth()
 # should not be called
 
 class B:
-    def __new__(self, v1, v2):
+    def __new__(cls, v1, v2):
         print("B.__new__", v1, v2)
 
     def __init__(self, v1, v2):

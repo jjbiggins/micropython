@@ -9,9 +9,6 @@ class Mapping:
         return ['a', 'b', 'c', 'abcdefghijklmnopqrst']
 
     def __getitem__(self, key):
-        if key == 'a':
-            return 1
-        else:
-            return 2
+        return 1 if key == 'a' else 2
 
 foo(**Mapping())

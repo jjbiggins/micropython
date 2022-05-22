@@ -14,7 +14,7 @@ maps = {
     framebuf.MONO_HMSB: "MONO_HMSB",
 }
 
-for mapping in maps.keys():
+for mapping in maps:
     for x in range(size):
         buf[x] = 0
     fbuf = framebuf.FrameBuffer(buf, w, h, mapping)
@@ -95,7 +95,7 @@ for mapping in maps.keys():
     print(buf)
 
     # char out of font range set to chr(127)
-    fbuf.text(str(chr(31)), 0, 0)
+    fbuf.text(chr(31), 0, 0)
     print(buf)
     print()
 

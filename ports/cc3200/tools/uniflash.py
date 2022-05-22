@@ -19,7 +19,7 @@ import subprocess
 
 
 def print_exception(e):
-    print("Exception: {}, on line {}".format(e, sys.exc_info()[-1].tb_lineno))
+    print(f"Exception: {e}, on line {sys.exc_info()[-1].tb_lineno}")
 
 
 def execute(command):
@@ -61,13 +61,13 @@ def main():
     args = cmd_parser.parse_args()
 
     output = ""
-    com_port = "com=" + str(args.port)
-    servicepack_path = "spPath=" + args.servicepack
+    com_port = f"com={str(args.port)}"
+    servicepack_path = f"spPath={args.servicepack}"
 
     try:
-        if args.uniflash == None or args.config == None:
+        if args.uniflash is None or args.config is None:
             raise ValueError("uniflash path and config path are mandatory")
-        if args.servicepack == None:
+        if args.servicepack is None:
             output += execute(
                 [
                     args.uniflash,

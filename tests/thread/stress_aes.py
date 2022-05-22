@@ -40,10 +40,7 @@ aes_s_box_table = bytes((
 
 # multiplication of polynomials modulo x^8 + x^4 + x^3 + x + 1 = 0x11b
 def aes_gf8_mul_2(x):
-    if x & 0x80:
-        return (x << 1) ^ 0x11B
-    else:
-        return x << 1
+    return (x << 1) ^ 0x11B if x & 0x80 else x << 1
 
 
 def aes_gf8_mul_3(x):
@@ -129,7 +126,7 @@ def aes_sb_sr_ark(state, w, w_idx, temp):
 def aes_state(state, w, temp, nr):
     aes_add_round_key(state, w)
     w_idx = 16
-    for i in range(nr - 1):
+    for _ in range(nr - 1):
         aes_sb_sr_mc_ark(state, w, w_idx, temp)
         w_idx += 16
     aes_sb_sr_ark(state, w, w_idx, temp)
@@ -149,7 +146,7 @@ def aes_key_expansion(key, w, temp, nk, nr):
             for j in range(1, 4):
                 t[j] = aes_s_box(w[w_idx + (j + 1) % 4])
         elif nk > 6 and i % nk == 4:
-            for j in range(0, 4):
+            for j in range(4):
                 t[j] = aes_s_box(w[w_idx + j])
         else:
             t = w
@@ -244,17 +241,17 @@ def thread_entry(n_loop):
     data = bytearray(128)
     # from now on we don't use the heap
 
-    for loop in range(n_loop):
+    for _ in range(n_loop):
         # encrypt
         aes.set_key(key)
         aes.set_iv(iv)
-        for i in range(8):
+        for _ in range(8):
             aes.apply_to(data)
 
         # decrypt
         aes.set_key(key)
         aes.set_iv(iv)
-        for i in range(8):
+        for _ in range(8):
             aes.apply_to(data)
 
         # verify
@@ -267,20 +264,21 @@ def thread_entry(n_loop):
 if __name__ == "__main__":
     import sys
 
-    if hasattr(sys, "settrace"):
+    if (
+        hasattr(sys, "settrace")
+        or sys.platform != "rp2"
+        and sys.platform in ("esp32", "pyboard")
+    ):
         # Builds with sys.settrace enabled are slow, so make the test short.
         n_thread = 2
         n_loop = 2
     elif sys.platform == "rp2":
         n_thread = 1
         n_loop = 2
-    elif sys.platform in ("esp32", "pyboard"):
-        n_thread = 2
-        n_loop = 2
     else:
         n_thread = 20
         n_loop = 5
-    for i in range(n_thread):
+    for _ in range(n_thread):
         _thread.start_new_thread(thread_entry, (n_loop,))
     thread_entry(n_loop)
     while count.value < n_thread:

@@ -78,7 +78,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.
@@ -105,7 +105,7 @@ def instance0():
         # Notify the central a few times.
         for i in range(4):
             time.sleep_ms(300)
-            ble.gatts_notify(conn_handle, char_tx_handle, "message{}".format(i))
+            ble.gatts_notify(conn_handle, char_tx_handle, f"message{i}")
 
         # Notify the central that we are done with our part of the test.
         time.sleep_ms(300)
@@ -136,7 +136,7 @@ def instance1():
         # Write to the characteristic a few times, with and without response.
         for i in range(4):
             print("gattc_write")
-            ble.gattc_write(conn_handle, rx_value_handle, "central{}".format(i), i & 1)
+            ble.gattc_write(conn_handle, rx_value_handle, f"central{i}", i & 1)
             if i & 1:
                 wait_for_event(_IRQ_GATTC_WRITE_DONE, TIMEOUT_MS)
             time.sleep_ms(400)

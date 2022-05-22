@@ -1,8 +1,7 @@
-els = []
 d = {1:2,3:4}
 a = d.popitem()
 print(len(d))
-els.append(a)
+els = [a]
 a = d.popitem()
 print(len(d))
 els.append(a)

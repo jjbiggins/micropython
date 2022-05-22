@@ -3,7 +3,7 @@
 
 def test(r):
     for _ in r:
-        str("a string that shouldn't be interned")
+        "a string that shouldn't be interned"
 
 
 ###########################################################################

@@ -59,7 +59,7 @@ def wait_for_event(event, timeout_ms):
         if event in waiting_events:
             return waiting_events.pop(event)
         machine.idle()
-    raise ValueError("Timeout waiting for {}".format(event))
+    raise ValueError(f"Timeout waiting for {event}")
 
 
 # Acting in peripheral role.
@@ -85,16 +85,15 @@ def instance0():
 
         for i in range(_NUM_NOTIFICATIONS):
             # Send a notification and wait for a response.
-            ble.gatts_notify(conn_handle, value_handle, "peripheral" + str(i))
+            ble.gatts_notify(conn_handle, value_handle, f"peripheral{str(i)}")
             wait_for_event(_IRQ_GATTC_NOTIFY, TIMEOUT_MS)
 
         ticks_end = time.ticks_ms()
         ticks_total = time.ticks_diff(ticks_end, ticks_start)
         print(
-            "Acknowledged {} notifications in {} ms. {} ms/notification.".format(
-                _NUM_NOTIFICATIONS, ticks_total, ticks_total // _NUM_NOTIFICATIONS
-            )
+            f"Acknowledged {_NUM_NOTIFICATIONS} notifications in {ticks_total} ms. {ticks_total // _NUM_NOTIFICATIONS} ms/notification."
         )
+
 
         # Disconnect the central.
         print("gap_disconnect:", ble.gap_disconnect(conn_handle))

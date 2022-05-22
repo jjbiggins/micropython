@@ -16,10 +16,8 @@ def test_bogus():
     try:
         res = socket.getaddrinfo("hey.!!$$", 80)
         print("getaddrinfo returned", res)
-    except OSError as e:
-        print("getaddrinfo raised")
     except Exception as e:
-        print("getaddrinfo raised")  # CPython raises UnicodeError!?
+        print("getaddrinfo raised")
 
 
 def test_ip_addr():
@@ -49,4 +47,4 @@ def test_valid():
 test_funs = [n for n in dir() if n.startswith("test_")]
 for f in sorted(test_funs):
     print("--", f, end=": ")
-    eval(f + "()")
+    eval(f"{f}()")

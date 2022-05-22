@@ -14,7 +14,7 @@ else:
 @coroutine
 def wait(value):
     print('wait value:', value)
-    msg = yield 'message from wait({})'.format(value)
+    msg = yield f'message from wait({value})'
     print('wait got back:', msg)
     return 10
 

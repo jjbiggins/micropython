@@ -159,8 +159,7 @@ class Pins(object):
                     cpu_pin_name = row[1]
                 except:
                     continue
-                pin = self.find_pin(cpu_pin_name)
-                if pin:
+                if pin := self.find_pin(cpu_pin_name):
                     pin.set_is_board_pin()
                     self.board_pins.append(NamedPin(board_pin_name, pin))
 
@@ -216,16 +215,16 @@ class Pins(object):
                 pin = named_pin.pin()
                 if pin.is_board_pin():
                     qstr_set |= set(pin.qstr_list())
-                    qstr_set |= set([named_pin.name()])
+                    qstr_set |= {named_pin.name()}
             for named_pin in self.board_pins:
-                qstr_set |= set([named_pin.name()])
+                qstr_set |= {named_pin.name()}
             for qstr in sorted(qstr_set):
                 cond_var = None
                 if qstr.startswith("AF"):
                     af_words = qstr.split("_")
                     cond_var = conditional_var(af_words[1])
                     print_conditional_if(cond_var, file=qstr_file)
-                print("Q({})".format(qstr), file=qstr_file)
+                print(f"Q({qstr})", file=qstr_file)
                 # print_conditional_endif(cond_var, file=qstr_file)
 
     def print_ad_hdr(self, ad_const_filename):

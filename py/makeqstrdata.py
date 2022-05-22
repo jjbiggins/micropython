@@ -238,7 +238,7 @@ def qstr_escape(qst):
             name = codepoint2name[c]
         except KeyError:
             name = "0x%02x" % c
-        return "_" + name + "_"
+        return f"_{name}_"
 
     return re.sub(r"[^A-Za-z0-9_]", esc_char, qst)
 
@@ -268,11 +268,11 @@ def parse_input_headers(infiles):
                 # is this a config line?
                 match = re.match(r"^QCFG\((.+), (.+)\)", line)
                 if match:
-                    value = match.group(2)
+                    value = match[2]
                     if value[0] == "(" and value[-1] == ")":
                         # strip parenthesis from config value
                         value = value[1:-1]
-                    qcfgs[match.group(1)] = value
+                    qcfgs[match[1]] = value
                     continue
 
                 # is this a QSTR line?
@@ -281,7 +281,7 @@ def parse_input_headers(infiles):
                     continue
 
                 # get the qstr value
-                qstr = match.group(1)
+                qstr = match[1]
 
                 # special cases to specify control characters
                 if qstr == "\\n":
@@ -352,7 +352,7 @@ def print_qstr_data(qcfgs, qstrs):
     # go through each qstr and print it out
     for order, ident, qstr in sorted(qstrs.values(), key=lambda x: x[0]):
         qbytes = make_bytes(cfg_bytes_len, cfg_bytes_hash, qstr)
-        print("QDEF(MP_QSTR_%s, %s)" % (ident, qbytes))
+        print(f"QDEF(MP_QSTR_{ident}, {qbytes})")
 
 
 def do_work(infiles):

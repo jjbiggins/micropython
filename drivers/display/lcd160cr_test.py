@@ -25,10 +25,7 @@ def show_adc(lcd, adc):
             lcd.set_font(2, trans=1)
             lcd.set_pos(0, lcd.h - 60 + i * 16)
         lcd.write("%4s: " % ("TEMP", "VBAT", "VREF")[i])
-        if i > 0:
-            s = "%6.3fV" % data[i]
-        else:
-            s = "%5.1f°C" % data[i]
+        s = "%6.3fV" % data[i] if i > 0 else "%5.1f°C" % data[i]
         if lcd.h == 160:
             lcd.set_font(1, bold=0, scale=1)
         else:

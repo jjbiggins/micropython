@@ -29,7 +29,7 @@ try:
 except:
     pass
 with open("boot.py", "w") as f:
-    f.write("DEBUG=" + str(DEBUG))
+    f.write(f"DEBUG={str(DEBUG)}")
     f.write(
         """
 import machine
@@ -85,10 +85,10 @@ elif STEP == 4:
 
 
 def copy_partition(src, dest):
-    log("Partition copy: {} --> {}".format(src.info(), dest.info()))
+    log(f"Partition copy: {src.info()} --> {dest.info()}")
     sz = src.info()[3]
     if dest.info()[3] != sz:
-        raise ValueError("Sizes don't match: {} vs {}".format(sz, dest.info()[3]))
+        raise ValueError(f"Sizes don't match: {sz} vs {dest.info()[3]}")
     addr = 0
     blk = bytearray(4096)
     while addr < sz:

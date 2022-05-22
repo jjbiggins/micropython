@@ -12,12 +12,10 @@ three = 3
 print("1")
 print("2")
 print(three)
-print("{}".format(4))
+print('4')
 five = 25 // 5
 print(int(five))
-j = 0
-for i in range(4):
-    j += i
+j = sum(range(4))
 print(j)
 print(3 + 4)
 try:
@@ -32,9 +30,7 @@ def ten():
 
 
 print(ten())
-a = []
-for i in range(13):
-    a.append(i)
+a = list(range(13))
 print(a[11])
 print(a[-1])
 str = "0123456789"
@@ -70,14 +66,11 @@ b.print()
 for i in range(20):
     pass
 print(i)
-if 20 > 30:
-    a = "1"
-else:
-    a = "2"
+a = "1" if 20 > 30 else "2"
 if 0 < 4:
-    print(a + "0")
+    print(f"{a}0")
 else:
-    print(a + "1")
+    print(f"{a}1")
 a = [20, 21, 22, 23, 24]
 for i in a:
     if i < 21:
@@ -146,7 +139,7 @@ while p == 36:
 print(p)
 for i in [38]:
     print(i)
-print(int(exec("def foo(): return 38") == None) + foo())
+print(int(exec("def foo(): return 38") is None) + foo())
 d = {}
 exec("def bar(): return 40", d)
 print(d["bar"]())
@@ -162,8 +155,7 @@ def fib2(n):
 
 
 print(fib2(100)[-2] - 14)
-Answer = {}
-Answer["ForAll"] = 42
+Answer = {"ForAll": 42}
 print(Answer["ForAll"])
 i = 43
 
@@ -189,10 +181,7 @@ print(46 + 1)
 
 
 def u(p):
-    if p > 3:
-        return 3 * p
-    else:
-        return u(2 * p) - 3 * u(p)
+    return 3 * p if p > 3 else u(2 * p) - 3 * u(p)
 
 
 print(u(16))
